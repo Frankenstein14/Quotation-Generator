@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { Quotation, Invoice, CompanySettings } from '../types';
-import { Plus, FileText, Settings, Download, Trash2, Edit2, Calendar, User, MapPin } from 'lucide-react';
+import { Plus, FileText, Settings, Download, Trash2, Edit2, Calendar, User, MapPin, LogIn, LogOut } from 'lucide-react';
 
 interface HomeScreenProps {
   quotations: Quotation[];
   invoices: Invoice[];
   settings: CompanySettings;
+  user: any;
+  onOpenAuth: () => void;
+  onSignOut: () => void;
   onCreateQuotation: () => void;
   onCreateInvoice: () => void;
   onEditQuotation: (q: Quotation) => void;
@@ -20,6 +23,9 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({
   quotations,
   invoices,
+  user,
+  onOpenAuth,
+  onSignOut,
   onCreateQuotation,
   onCreateInvoice,
   onEditQuotation,
@@ -49,27 +55,64 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <div className="min-h-screen bg-[#100e13] text-stone-100 flex flex-col justify-between selection:bg-brand-gold selection:text-brand-maroon-dark">
-      {/* Top Bar with Settings */}
-      <header className="flex items-center justify-between px-6 sm:px-12 py-5 border-b border-stone-800/80 bg-[#141218]/90 backdrop-blur-md">
+      {/* Top Bar with Settings and Multi-Device Auth */}
+      <header className="flex items-center justify-between px-4 sm:px-12 py-4 border-b border-stone-800/80 bg-[#141218]/90 backdrop-blur-md sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <img
             src="/assets/image3.png"
             alt="Kalakar Events Logo"
             className="w-10 h-10 object-contain drop-shadow"
           />
-          <span className="font-serif font-bold text-sm tracking-widest text-brand-gold-light uppercase">
-            KALAKAR EVENTS
-          </span>
+          <div className="flex flex-col">
+            <span className="font-serif font-bold text-sm tracking-widest text-brand-gold-light uppercase">
+              KALAKAR EVENTS
+            </span>
+            <span className="text-[10px] text-stone-400 font-mono hidden sm:inline">
+              Cloud Multi-Device Sync
+            </span>
+          </div>
         </div>
 
-        <button
-          onClick={onOpenSettings}
-          className="flex items-center gap-2 px-3.5 py-1.5 bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-brand-gold-light border border-stone-700 rounded-lg text-xs font-semibold transition"
-          title="Company Information & Default Settings"
-        >
-          <Settings size={14} className="text-brand-gold" />
-          <span>Settings</span>
-        </button>
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {user ? (
+            <div className="flex items-center gap-2 bg-[#1b1722] border border-stone-700/80 rounded-xl px-2.5 sm:px-3 py-1.5 shadow-inner">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" title="Cloud Synced" />
+              <div className="flex flex-col text-left">
+                <span className="text-[11px] font-semibold text-stone-200 max-w-[120px] sm:max-w-[180px] truncate">
+                  {user.email}
+                </span>
+                <span className="text-[9px] text-emerald-400/90 font-medium hidden sm:inline">
+                  Synced across devices
+                </span>
+              </div>
+              <button
+                onClick={onSignOut}
+                className="ml-1 sm:ml-2 text-stone-400 hover:text-red-300 p-1 rounded hover:bg-stone-800 transition"
+                title="Sign Out"
+              >
+                <LogOut size={13} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon text-brand-gold-light border border-brand-gold/40 rounded-xl text-xs font-semibold shadow-md transition"
+              title="Sign in or register to sync across devices"
+            >
+              <LogIn size={14} className="text-brand-gold" />
+              <span>Multi-Device Login</span>
+            </button>
+          )}
+
+          <button
+            onClick={onOpenSettings}
+            className="flex items-center gap-2 px-3.5 py-1.5 bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-brand-gold-light border border-stone-700 rounded-xl text-xs font-semibold transition"
+            title="Company Information & Default Settings"
+          >
+            <Settings size={14} className="text-brand-gold" />
+            <span className="hidden sm:inline">Settings</span>
+          </button>
+        </div>
       </header>
 
       {/* Hero Section */}

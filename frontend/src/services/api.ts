@@ -219,10 +219,28 @@ export const api = {
         .select('data')
         .order('created_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
-        const list = data.map((row: any) => row.data as Quotation);
-        setLocal('kalakar_quotations', list);
-        return list;
+      if (!error && data) {
+        if (data.length > 0) {
+          const list = data.map((row: any) => row.data as Quotation);
+          setLocal('kalakar_quotations', list);
+          return list;
+        } else {
+          // Table exists but is empty: seed it with any existing local quotations
+          const local = getLocal<Quotation[]>('kalakar_quotations', []);
+          if (local.length > 0) {
+            for (const q of local) {
+              await supabase.from('kalakar_quotations').upsert({
+                id: q.id || q._id,
+                quotation_number: q.quotationNumber,
+                client_name: q.client?.name || '',
+                date: q.date || '',
+                grand_total: q.grandTotal || 0,
+                data: q,
+              }).then(() => {}, () => {});
+            }
+            return local;
+          }
+        }
       }
     } catch (e) {
       console.warn('Supabase quotations fetch error, falling back to local:', e);
@@ -380,10 +398,27 @@ export const api = {
         .select('data')
         .order('created_at', { ascending: false });
 
-      if (!error && data && data.length > 0) {
-        const list = data.map((row: any) => row.data as Invoice);
-        setLocal('kalakar_invoices', list);
-        return list;
+      if (!error && data) {
+        if (data.length > 0) {
+          const list = data.map((row: any) => row.data as Invoice);
+          setLocal('kalakar_invoices', list);
+          return list;
+        } else {
+          const local = getLocal<Invoice[]>('kalakar_invoices', []);
+          if (local.length > 0) {
+            for (const inv of local) {
+              await supabase.from('kalakar_invoices').upsert({
+                id: inv.id || inv._id,
+                invoice_number: inv.invoiceNumber,
+                client_name: inv.client?.name || '',
+                date: inv.date || '',
+                grand_total: inv.grandTotal || 0,
+                data: inv,
+              }).then(() => {}, () => {});
+            }
+            return local;
+          }
+        }
       }
     } catch (e) {
       console.warn('Supabase invoices fetch error, falling back to local:', e);

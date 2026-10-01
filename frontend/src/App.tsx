@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Quotation, Invoice, CompanySettings } from './types';
 import { api } from './services/api';
+import { supabase } from './services/supabase';
 import { HomeScreen } from './components/HomeScreen';
 import { QuotationEditor } from './components/QuotationEditor/QuotationEditor';
 import { InvoiceEditor } from './components/InvoiceEditor/InvoiceEditor';
 import { SettingsModal } from './components/SettingsModal';
+import { AuthModal } from './components/AuthModal';
 
 const DEFAULT_SETTINGS: CompanySettings = {
   companyName: 'KALAKAR EVENTS',
@@ -43,21 +45,52 @@ export function App() {
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  // Load Initial Data from Backend
+  const loadData = async () => {
+    try {
+      const [s, q, inv] = await Promise.all([
+        api.getSettings(),
+        api.getQuotations(),
+        api.getInvoices()
+      ]);
+      setSettings(s);
+      setQuotations(q);
+      setInvoices(inv);
+    } catch (e) {
+      console.warn('Could not load data from Supabase/storage:', e);
+    }
+  };
+
+  // Load Initial Data & listen for Auth state across devices
   useEffect(() => {
-    api.getSettings()
-      .then(setSettings)
-      .catch((e) => console.warn('Could not load settings from backend:', e));
+    loadData();
 
-    api.getQuotations()
-      .then(setQuotations)
-      .catch((e) => console.warn('Could not load quotations:', e));
+    // Check currently signed-in user
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data?.user ?? null);
+    });
 
-    api.getInvoices()
-      .then(setInvoices)
-      .catch((e) => console.warn('Could not load invoices:', e));
+    // Listen to login/logout events across browser sessions
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      loadData();
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (e) {
+      console.error('Sign out error:', e);
+    }
+  };
 
   const handleCreateQuotation = () => {
     setEditingQuotation(null);
@@ -144,6 +177,9 @@ export function App() {
           quotations={quotations}
           invoices={invoices}
           settings={settings}
+          user={user}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onSignOut={handleSignOut}
           onCreateQuotation={handleCreateQuotation}
           onCreateInvoice={handleCreateInvoice}
           onEditQuotation={handleEditQuotation}
@@ -180,6 +216,16 @@ export function App() {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onSaved={setSettings}
+      />
+
+      {/* Multi-Device Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={(loggedInUser) => {
+          setUser(loggedInUser);
+          loadData();
+        }}
       />
     </>
   );
