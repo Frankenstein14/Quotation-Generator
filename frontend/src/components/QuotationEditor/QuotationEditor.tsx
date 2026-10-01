@@ -7,7 +7,7 @@ import { TermsPaymentEditor } from './TermsPaymentEditor';
 import { QuotationDocument } from '../Preview/QuotationDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
 import { api } from '../../services/api';
-import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, Sparkles, RotateCcw } from 'lucide-react';
 
 interface QuotationEditorProps {
   initialQuotation?: Quotation | null;
@@ -239,6 +239,43 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
     }
   };
 
+  const handleStartFromBeginning = () => {
+    if (window.confirm('Start from the beginning? This will clear client details, items, and inclusions to a clean blank slate.')) {
+      const today = new Date();
+      const formattedDate = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+      setQuotation(prev => ({
+        ...prev,
+        client: {
+          name: '',
+          phone: '',
+          email: '',
+          address: ''
+        },
+        event: {
+          name: '',
+          type: 'Wedding',
+          date: formattedDate,
+          location: '',
+          guestCount: ''
+        },
+        items: [
+          { id: 'item_1', description: '', quantity: '', unit: '', rate: '', amount: 0 }
+        ],
+        subtotal: 0,
+        discountType: 'fixed',
+        discountValue: 0,
+        discountAmount: 0,
+        taxPercentage: 0,
+        taxAmount: 0,
+        grandTotal: 0,
+        manualGrandTotal: false,
+        inclusions: [],
+        status: 'draft'
+      }));
+      showToast('success', 'Reset to blank slate! You can create everything from the beginning.');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-[#121015] text-stone-100 overflow-hidden">
       {/* Toast Notification */}
@@ -260,62 +297,88 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
       )}
 
       {/* Header Bar */}
-      <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition"
-          >
-            <ArrowLeft size={14} />
-            <span>Home</span>
-          </button>
+      <header className="px-3 sm:px-6 py-2.5 sm:py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none space-y-2 sm:space-y-0">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition"
+            >
+              <ArrowLeft size={14} />
+              <span className="hidden sm:inline">Home</span>
+            </button>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-serif font-bold text-sm sm:text-base text-brand-gold tracking-wide">
-                {quotation.quotationNumber}
-              </h2>
-              <span className="text-xs text-stone-400 hidden sm:inline">
-                ({quotation.client.name || 'New Client'})
-              </span>
+            <div>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="font-serif font-bold text-xs sm:text-base text-brand-gold tracking-wide">
+                  {quotation.quotationNumber}
+                </h2>
+                <span className="text-[11px] sm:text-xs text-stone-400 max-w-[110px] sm:max-w-none truncate">
+                  ({quotation.client.name || 'New Client'})
+                </span>
+              </div>
+              <p className="text-[10px] sm:text-[11px] text-stone-500 hidden sm:block">
+                Quotation Editor &middot; Inclusions on Page 1
+              </p>
             </div>
-            <p className="text-[11px] text-stone-500 hidden sm:block">
-              Quotation Editor &middot; Inclusions on Page 1
-            </p>
+          </div>
+
+          {/* Desktop Reset / Start from Beginning */}
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleStartFromBeginning}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-brand-gold-light border border-stone-700 rounded-lg text-xs font-semibold transition"
+              title="Clear all fields and start everything from the beginning"
+            >
+              <RotateCcw size={13} />
+              <span>Start from Beginning</span>
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-semibold shadow-lg hover:shadow-brand-maroon/30 transition disabled:opacity-50"
+            >
+              <Save size={14} className="text-brand-gold" />
+              <span>{isSaving ? 'Saving...' : 'Save Quotation'}</span>
+            </button>
           </div>
         </div>
 
-        {/* Mobile View Toggle */}
-        <div className="flex md:hidden bg-[#121015] border border-stone-700 rounded-lg p-0.5 text-xs">
-          <button
-            onClick={() => setMobileView('editor')}
-            className={`px-3 py-1 rounded flex items-center gap-1 font-medium ${
-              mobileView === 'editor' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
-            }`}
-          >
-            <Edit3 size={13} />
-            <span>Editor</span>
-          </button>
-          <button
-            onClick={() => setMobileView('preview')}
-            className={`px-3 py-1 rounded flex items-center gap-1 font-medium ${
-              mobileView === 'preview' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
-            }`}
-          >
-            <Eye size={13} />
-            <span>Preview</span>
-          </button>
-        </div>
+        {/* Mobile View Toggle & Start Fresh Button */}
+        <div className="flex md:hidden items-center justify-between gap-2 pt-1 border-t border-stone-800/60">
+          <div className="flex bg-[#121015] border border-stone-700 rounded-lg p-0.5 text-xs flex-1 max-w-[180px]">
+            <button
+              onClick={() => setMobileView('editor')}
+              className={`flex-1 py-1 rounded flex items-center justify-center gap-1 font-medium ${
+                mobileView === 'editor' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
+              }`}
+            >
+              <Edit3 size={12} />
+              <span>Editor</span>
+            </button>
+            <button
+              onClick={() => setMobileView('preview')}
+              className={`flex-1 py-1 rounded flex items-center justify-center gap-1 font-medium ${
+                mobileView === 'preview' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
+              }`}
+            >
+              <Eye size={12} />
+              <span>Preview</span>
+            </button>
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
           <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-semibold shadow-lg hover:shadow-brand-maroon/30 transition disabled:opacity-50"
+            type="button"
+            onClick={handleStartFromBeginning}
+            className="flex items-center gap-1 px-2.5 py-1 bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700 rounded-lg text-[11px] font-semibold transition"
           >
-            <Save size={14} className="text-brand-gold" />
-            <span>{isSaving ? 'Saving...' : 'Save Quotation'}</span>
+            <RotateCcw size={12} />
+            <span>Start Fresh</span>
           </button>
         </div>
       </header>

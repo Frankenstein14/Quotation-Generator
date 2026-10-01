@@ -159,65 +159,95 @@ export const ItemsTableEditor: React.FC<ItemsTableEditorProps> = ({
           {items.map((item, idx) => (
             <div
               key={item.id || idx}
-              className="bg-[#141217] border border-stone-800/90 rounded-lg p-3 flex flex-col md:flex-row items-start md:items-center gap-3 transition hover:border-stone-700"
+              className="bg-[#141217] border border-stone-800/90 rounded-xl p-3 sm:p-3.5 flex flex-col md:flex-row items-start md:items-center gap-2.5 sm:gap-3 transition hover:border-stone-700"
             >
-              <span className="text-stone-500 font-mono text-xs w-5 text-center hidden md:inline-block">
-                {idx + 1}
-              </span>
-
-              {/* Description */}
-              <div className="flex-1 w-full md:w-auto">
+              {/* Row 1 on mobile: Number + Description + Action Buttons */}
+              <div className="flex items-center gap-2 w-full flex-1">
+                <span className="text-stone-500 font-mono text-xs w-5 text-center shrink-0">
+                  #{idx + 1}
+                </span>
                 <input
                   type="text"
                   value={item.description}
                   onChange={(e) => handleItemFieldChange(idx, 'description', e.target.value)}
-                  placeholder="Item Description (e.g. Decoration or Catering)"
-                  className="w-full bg-[#1b1820] border border-stone-700/80 rounded-md px-3 py-1.5 text-xs text-stone-100 focus:outline-none focus:border-brand-gold transition"
+                  placeholder="Item Description (e.g. Stage Decor, Photography...)"
+                  className="flex-1 bg-[#1b1820] border border-stone-700/80 rounded-md px-3 py-1.5 text-xs text-stone-100 focus:outline-none focus:border-brand-gold transition"
                 />
+                <div className="flex md:hidden items-center gap-0.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleMoveItem(idx, 'up')}
+                    disabled={idx === 0}
+                    className="p-1 text-stone-400 hover:text-stone-100 disabled:opacity-20 rounded"
+                    title="Move Item Up"
+                  >
+                    <ArrowUp size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleMoveItem(idx, 'down')}
+                    disabled={idx === items.length - 1}
+                    className="p-1 text-stone-400 hover:text-stone-100 disabled:opacity-20 rounded"
+                    title="Move Item Down"
+                  >
+                    <ArrowDown size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteItem(idx)}
+                    className="p-1 text-red-400 hover:text-red-300 rounded hover:bg-red-950/30"
+                    title="Delete Item"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
 
-              {/* Quantity & Unit */}
-              <div className="flex items-center gap-1.5 w-full md:w-44">
-                <input
-                  type="text"
-                  value={item.quantity !== undefined ? item.quantity : ''}
-                  onChange={(e) => handleItemFieldChange(idx, 'quantity', e.target.value)}
-                  placeholder="Qty"
-                  className="w-16 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-center text-stone-100 focus:outline-none focus:border-brand-gold transition"
-                />
-                <input
-                  type="text"
-                  value={item.unit || ''}
-                  onChange={(e) => handleItemFieldChange(idx, 'unit', e.target.value)}
-                  placeholder="Unit (pax/nos)"
-                  className="w-24 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-stone-300 focus:outline-none focus:border-brand-gold transition"
-                />
+              {/* Row 2 on mobile / Inline on desktop: Qty, Unit, Rate, Amount */}
+              <div className="grid grid-cols-3 md:flex md:items-center gap-2 w-full md:w-auto">
+                {/* Quantity & Unit */}
+                <div className="flex items-center gap-1 md:w-40">
+                  <input
+                    type="text"
+                    value={item.quantity !== undefined ? item.quantity : ''}
+                    onChange={(e) => handleItemFieldChange(idx, 'quantity', e.target.value)}
+                    placeholder="Qty"
+                    className="w-1/2 md:w-16 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-center text-stone-100 focus:outline-none focus:border-brand-gold transition font-mono"
+                  />
+                  <input
+                    type="text"
+                    value={item.unit || ''}
+                    onChange={(e) => handleItemFieldChange(idx, 'unit', e.target.value)}
+                    placeholder="Unit"
+                    className="w-1/2 md:w-24 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-stone-300 focus:outline-none focus:border-brand-gold transition"
+                  />
+                </div>
+
+                {/* Rate */}
+                <div className="md:w-28">
+                  <input
+                    type="number"
+                    value={item.rate !== undefined ? item.rate : ''}
+                    onChange={(e) => handleItemFieldChange(idx, 'rate', e.target.value)}
+                    placeholder="Rate (₹)"
+                    className="w-full bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-stone-100 text-right focus:outline-none focus:border-brand-gold transition font-mono"
+                  />
+                </div>
+
+                {/* Total Amount */}
+                <div className="md:w-32">
+                  <input
+                    type="number"
+                    value={item.amount || ''}
+                    onChange={(e) => handleItemFieldChange(idx, 'amount', e.target.value)}
+                    placeholder="Total (₹)"
+                    className="w-full bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs font-semibold text-brand-gold-light text-right focus:outline-none focus:border-brand-gold transition font-mono"
+                  />
+                </div>
               </div>
 
-              {/* Rate */}
-              <div className="w-full md:w-28">
-                <input
-                  type="number"
-                  value={item.rate !== undefined ? item.rate : ''}
-                  onChange={(e) => handleItemFieldChange(idx, 'rate', e.target.value)}
-                  placeholder="Unit Price"
-                  className="w-full bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-stone-100 text-right focus:outline-none focus:border-brand-gold transition font-mono"
-                />
-              </div>
-
-              {/* Total Amount */}
-              <div className="w-full md:w-32">
-                <input
-                  type="number"
-                  value={item.amount || ''}
-                  onChange={(e) => handleItemFieldChange(idx, 'amount', e.target.value)}
-                  placeholder="Total Amount"
-                  className="w-full bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs font-semibold text-brand-gold-light text-right focus:outline-none focus:border-brand-gold transition font-mono"
-                />
-              </div>
-
-              {/* Reorder and Delete controls */}
-              <div className="flex items-center gap-1 self-end md:self-center">
+              {/* Desktop action buttons */}
+              <div className="hidden md:flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => handleMoveItem(idx, 'up')}

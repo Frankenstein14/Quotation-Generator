@@ -167,12 +167,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </h2>
             </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
               {/* Filter Tabs */}
-              <div className="flex bg-[#121015] border border-stone-700/80 rounded-lg p-0.5 text-xs">
+              <div className="flex bg-[#121015] border border-stone-700/80 rounded-lg p-0.5 text-xs w-full sm:w-auto">
                 <button
                   onClick={() => setActiveTab('all')}
-                  className={`px-3 py-1 rounded transition ${
+                  className={`flex-1 sm:flex-initial px-3 py-1.5 rounded transition ${
                     activeTab === 'all'
                       ? 'bg-brand-maroon text-white font-semibold'
                       : 'text-stone-400 hover:text-white'
@@ -182,17 +182,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 </button>
                 <button
                   onClick={() => setActiveTab('quotations')}
-                  className={`px-3 py-1 rounded transition ${
+                  className={`flex-1 sm:flex-initial px-3 py-1.5 rounded transition ${
                     activeTab === 'quotations'
                       ? 'bg-brand-maroon text-white font-semibold'
                       : 'text-stone-400 hover:text-white'
                   }`}
                 >
-                  Quotations ({quotations.length})
+                  Quotes ({quotations.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('invoices')}
-                  className={`px-3 py-1 rounded transition ${
+                  className={`flex-1 sm:flex-initial px-3 py-1.5 rounded transition ${
                     activeTab === 'invoices'
                       ? 'bg-brand-maroon text-white font-semibold'
                       : 'text-stone-400 hover:text-white'
@@ -208,7 +208,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search documents..."
-                className="bg-[#121015] border border-stone-700/80 rounded-lg px-3 py-1 text-xs text-stone-200 placeholder-stone-500 focus:outline-none focus:border-brand-gold"
+                className="w-full sm:w-48 bg-[#121015] border border-stone-700/80 rounded-lg px-3 py-1.5 text-xs text-stone-200 placeholder-stone-500 focus:outline-none focus:border-brand-gold"
               />
             </div>
           </div>
@@ -220,10 +220,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               filteredQuotations.map((q) => (
                 <div
                   key={q._id || q.id}
-                  className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group transition hover:bg-[#1c1824]/40 px-3 rounded-lg"
+                  className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group transition hover:bg-[#1c1824]/40 px-3 rounded-xl"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5">
+                  <div className="space-y-1 w-full sm:w-auto">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs font-bold text-brand-gold bg-brand-maroon/30 px-2 py-0.5 rounded border border-brand-maroon/60">
                         {q.quotationNumber}
                       </span>
@@ -236,7 +236,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-stone-400">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-stone-400">
                       <span className="flex items-center gap-1">
                         <Calendar size={12} />
                         {q.date}
@@ -248,12 +248,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         </span>
                       )}
                       <span className="text-stone-300 font-medium">
-                        {q.items.length} items &middot; {q.inclusions?.length || 0} inclusion categories
+                        {q.items.length} items &middot; {q.inclusions?.length || 0} categories
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 self-end sm:self-center">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-800/40">
                     <span className="font-serif font-bold text-base text-brand-gold-light">
                       ₹{q.grandTotal.toLocaleString('en-IN')}
                     </span>
@@ -261,7 +261,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => onEditQuotation(q)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
+                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
                         title="Edit Quotation"
                       >
                         <Edit2 size={13} />
@@ -270,7 +270,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
                       <button
                         onClick={() => onDownloadQuotationPdf((q._id || q.id)!, q.quotationNumber)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-brand-maroon/80 hover:bg-brand-maroon text-brand-gold-light border border-brand-gold/30 rounded-lg text-xs font-medium transition"
+                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-brand-maroon/80 hover:bg-brand-maroon text-brand-gold-light border border-brand-gold/30 rounded-lg text-xs font-medium transition"
                         title="Download PDF"
                       >
                         <Download size={13} />
@@ -298,10 +298,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               filteredInvoices.map((inv) => (
                 <div
                   key={inv._id || inv.id}
-                  className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group transition hover:bg-[#1c1824]/40 px-3 rounded-lg"
+                  className="py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group transition hover:bg-[#1c1824]/40 px-3 rounded-xl"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5">
+                  <div className="space-y-1 w-full sm:w-auto">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-xs font-bold text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/60">
                         {inv.invoiceNumber}
                       </span>
@@ -314,7 +314,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-stone-400">
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-stone-400">
                       <span className="flex items-center gap-1">
                         <Calendar size={12} />
                         Date: {inv.date} &middot; Due: {inv.dueDate}
@@ -331,7 +331,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 self-end sm:self-center">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-800/40">
                     <span className="font-serif font-bold text-base text-brand-gold-light">
                       ₹{inv.grandTotal.toLocaleString('en-IN')}
                     </span>
@@ -339,7 +339,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() => onEditInvoice(inv)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
+                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
                         title="Edit Invoice"
                       >
                         <Edit2 size={13} />
@@ -348,7 +348,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
                       <button
                         onClick={() => onDownloadInvoicePdf((inv._id || inv.id)!, inv.invoiceNumber)}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-brand-maroon/80 hover:bg-brand-maroon text-brand-gold-light border border-brand-gold/30 rounded-lg text-xs font-medium transition"
+                        className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-brand-maroon/80 hover:bg-brand-maroon text-brand-gold-light border border-brand-gold/30 rounded-lg text-xs font-medium transition"
                         title="Download PDF"
                       >
                         <Download size={13} />

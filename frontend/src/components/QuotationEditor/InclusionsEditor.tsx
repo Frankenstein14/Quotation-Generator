@@ -106,7 +106,14 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
   };
 
   // Preset Template Loader
-  const loadPreset = (type: 'reference' | 'wedding' | 'corporate') => {
+  const loadPreset = (type: 'new' | 'reference' | 'wedding' | 'corporate') => {
+    if (type === 'new') {
+      if (inclusions.length > 0 && !window.confirm('Clear all inclusion categories to start fresh from the beginning?')) {
+        return;
+      }
+      onChange([]);
+      return;
+    }
     if (type === 'reference') {
       onChange([
         {
@@ -254,35 +261,63 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
   return (
     <div className="space-y-6">
       {/* Preset bar */}
-      <div className="bg-[#1c1920] border border-stone-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+      <div className="bg-[#1c1920] border border-stone-800 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
         <div className="flex items-center gap-2 text-xs font-semibold text-stone-300">
-          <Sparkles size={14} className="text-brand-gold" />
+          <Sparkles size={14} className="text-brand-gold shrink-0" />
           <span>Quick Inclusions Templates:</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => loadPreset('new')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm ${
+              inclusions.length === 0
+                ? 'bg-brand-maroon text-brand-gold-light border border-brand-gold'
+                : 'bg-[#251c2e] hover:bg-[#34273e] text-brand-gold-light border border-brand-gold/50'
+            }`}
+            title="Start fresh from the beginning with blank inclusions"
+          >
+            <Plus size={13} className="text-brand-gold" />
+            <span>New (Start from Beginning)</span>
+          </button>
           <button
             type="button"
             onClick={() => loadPreset('reference')}
-            className="px-3 py-1 bg-brand-maroon/40 hover:bg-brand-maroon/60 border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-medium transition"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
           >
             Reference Quote Template
           </button>
           <button
             type="button"
             onClick={() => loadPreset('wedding')}
-            className="px-3 py-1 bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
           >
             Grand Wedding
           </button>
           <button
             type="button"
             onClick={() => loadPreset('corporate')}
-            className="px-3 py-1 bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
           >
             Corporate Conference
           </button>
         </div>
       </div>
+
+      {/* Empty State when starting from scratch */}
+      {inclusions.length === 0 && (
+        <div className="bg-[#18151f] border border-dashed border-stone-700/80 rounded-xl p-6 sm:p-8 text-center space-y-3">
+          <div className="w-12 h-12 mx-auto rounded-full bg-brand-maroon/30 border border-brand-gold/40 flex items-center justify-center">
+            <Sparkles size={20} className="text-brand-gold" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-semibold text-stone-200">Starting from the Beginning</h4>
+            <p className="text-xs text-stone-400 max-w-md mx-auto">
+              No inclusions yet. Fill out the &quot;+ Add New Inclusions Section&quot; form below to build your custom scope, or choose one of the templates above.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Sections List */}
       <div className="space-y-4">
@@ -351,7 +386,7 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
                     onChange={(e) => handleUpdateBullet(sIdx, bIdx, e.target.value)}
                     className="flex-1 bg-[#141217] border border-transparent hover:border-stone-700 focus:border-brand-gold rounded px-2.5 py-1 text-xs text-stone-200 focus:outline-none transition"
                   />
-                  <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition">
+                  <div className="flex items-center gap-0.5 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition">
                     <button
                       type="button"
                       onClick={() => handleMoveBullet(sIdx, bIdx, 'up')}

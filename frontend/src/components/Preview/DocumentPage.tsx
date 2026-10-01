@@ -28,7 +28,7 @@ export const DocumentPage: React.FC<DocumentPageProps> = ({
           top: '16mm',
           left: '17mm',
           right: '17mm',
-          bottom: '12mm'
+          bottom: '12.5mm'
         }}
       >
         {/* Header Block: 38mm height vertically centers title with logo (which ends at 54.2mm) */}
@@ -71,17 +71,31 @@ export const DocumentPage: React.FC<DocumentPageProps> = ({
           {children}
         </div>
 
-        {/* Page Footer: Centered Page Number & Footer Note */}
-        <div className="mt-auto pt-[2mm] text-center pointer-events-none">
+        {/* Page Footer: Crisp vector dividing line, centered Page Number & Note */}
+        <div className="mt-auto pointer-events-none w-full" style={{ paddingTop: '3mm' }}>
+          {/* Crisp Divider Line */}
           <div
-            className="font-medium text-[#222222]"
-            style={{ fontSize: '10pt', marginBottom: '2mm' }}
+            className="w-full bg-[#1e1c22]"
+            style={{ height: '1.2px', marginBottom: '2.5mm' }}
+          />
+
+          {/* Page Number (clean serif with subtle em-dashes) */}
+          <div
+            className="text-center font-serif font-bold text-[#1e1c22]"
+            style={{ fontSize: '9.5pt', letterSpacing: '2px', marginBottom: '1.5mm' }}
           >
-            {pageNumber}
+            — {pageNumber} —
           </div>
+
+          {/* Subtitle Footer Note */}
           <div
-            className="text-[#333333]"
-            style={{ fontSize: '7.8pt', letterSpacing: '0.2px' }}
+            className="text-center text-[#555259]"
+            style={{
+              fontFamily: "'Plus Jakarta Sans', Arial, sans-serif",
+              fontSize: '7.5pt',
+              letterSpacing: '0.25px',
+              fontWeight: 500
+            }}
           >
             If you have any questions concerning this quotation, please contact sales team
           </div>
