@@ -1,0 +1,16 @@
+{
+  "name": "kalakar-events-app",
+  "version": "1.0.0",
+  "description": "KALAKAR EVENTS Quotation & Invoice Generator Web Application",
+  "scripts": {
+    "start": "cd backend && npm run start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build": "cd frontend && npm run build && cd ../backend && npm run build"
+  },
+  "keywords": ["quotation", "invoice", "pdf-generator", "kalakar-events"],
+  "author": "Kalakar Events Team",
+  "license": "ISC"
+}
