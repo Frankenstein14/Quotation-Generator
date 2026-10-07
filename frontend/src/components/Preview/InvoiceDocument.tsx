@@ -42,6 +42,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice: inv }
             key={`inv-${ip.pageNumber}`}
             pageNumber={ip.pageNumber}
             title={ip.title}
+            footerNote="If you have any questions concerning this invoice, please contact accounts team"
             metaRow={
               <div className="flex items-center justify-center">
                 <span>Invoice Number &nbsp;:&nbsp; <strong className="font-normal">{ip.invoiceNumber}</strong></span>
@@ -127,7 +128,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice: inv }
                 </tr>
               </thead>
               <tbody>
-                ${ip.items.map((item, idx) => {
+                {ip.items.map((item, idx) => {
                   const itemNum = ((ip.pageNumber - 1) * 10) + idx + 1;
                   const isAlt = idx % 2 === 0;
                   const qtyDisplay = item.quantity !== undefined && item.quantity !== null && String(item.quantity).trim() !== '' && String(item.quantity).trim() !== '1'

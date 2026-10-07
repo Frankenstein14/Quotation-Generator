@@ -4,6 +4,7 @@ interface DocumentPageProps {
   pageNumber: number;
   title: string;
   metaRow?: React.ReactNode;
+  footerNote?: string;
   children: React.ReactNode;
 }
 
@@ -11,6 +12,7 @@ export const DocumentPage: React.FC<DocumentPageProps> = ({
   pageNumber,
   title,
   metaRow,
+  footerNote,
   children
 }) => {
   return (
@@ -97,7 +99,7 @@ export const DocumentPage: React.FC<DocumentPageProps> = ({
               fontWeight: 500
             }}
           >
-            If you have any questions concerning this quotation, please contact sales team
+            {footerNote || 'If you have any questions concerning this quotation, please contact sales team'}
           </div>
         </div>
       </div>

@@ -307,7 +307,7 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({ quotation:
         >
           {tp.isFirstTermsPage && (
             <>
-              <div className="flex flex-row justify-between py-[1mm] pb-[2mm]">
+              <div className="flex flex-row justify-between pt-[4mm] pb-[2mm]">
                 {/* Left: Contact Informations */}
                 <div className="flex-1">
                   <div className="font-bold text-[#111111] text-[10.5pt] mb-[3.5mm]">
