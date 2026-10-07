@@ -131,18 +131,30 @@ export function App() {
   };
 
   const handleDownloadQuotationPdf = async (id: string, num: string) => {
-    try {
-      await api.downloadQuotationPdf(id, num);
-    } catch (e: any) {
-      alert('Failed to download PDF: ' + e.message);
+    const q = quotations.find(item => (item._id === id || item.id === id));
+    if (q) {
+      setEditingQuotation(q);
+      setView('quotation_editor');
+    } else {
+      try {
+        await api.downloadQuotationPdf(id, num);
+      } catch (e: any) {
+        alert('Failed to download PDF: ' + e.message);
+      }
     }
   };
 
   const handleDownloadInvoicePdf = async (id: string, num: string) => {
-    try {
-      await api.downloadInvoicePdf(id, num);
-    } catch (e: any) {
-      alert('Failed to download PDF: ' + e.message);
+    const inv = invoices.find(item => (item._id === id || item.id === id));
+    if (inv) {
+      setEditingInvoice(inv);
+      setView('invoice_editor');
+    } else {
+      try {
+        await api.downloadInvoicePdf(id, num);
+      } catch (e: any) {
+        alert('Failed to download PDF: ' + e.message);
+      }
     }
   };
 

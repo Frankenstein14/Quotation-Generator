@@ -107,9 +107,10 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       </div>
 
       {/* Document View Canvas */}
-      <div className="flex-1 overflow-auto p-2 sm:p-8 flex justify-center bg-[#131116] min-h-0 print:p-0 print:bg-white">
+      <div className="flex-1 overflow-auto p-2 sm:p-8 flex justify-center bg-[#131116] min-h-0 print:p-0 print:bg-white document-canvas-wrapper">
         <div
-          className="transition-transform duration-150 origin-top flex flex-col items-center"
+          id="printable-document-area"
+          className="transition-transform duration-150 origin-top flex flex-col items-center document-scale-container"
           style={{ transform: `scale(${scale})` }}
         >
           {children}

@@ -4,6 +4,7 @@ import { ClientEventForm } from '../QuotationEditor/ClientEventForm';
 import { ItemsTableEditor } from '../QuotationEditor/ItemsTableEditor';
 import { InvoiceDocument } from '../Preview/InvoiceDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
+import { exportDocumentToPdf } from '../../services/pdfExporter';
 import { api } from '../../services/api';
 import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, CreditCard, ShieldCheck } from 'lucide-react';
 
@@ -165,17 +166,13 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
   const handleDownloadPdf = async () => {
     try {
       setIsGeneratingPdf(true);
-      if (invoice._id || invoice.id) {
-        await api.downloadInvoicePdf(
-          (invoice._id || invoice.id)!,
-          invoice.invoiceNumber
-        );
-      } else {
-        await api.previewInvoicePdf(invoice, invoice.invoiceNumber);
-      }
+      await exportDocumentToPdf({
+        filename: `Invoice_${invoice.invoiceNumber || 'INV'}.pdf`
+      });
       showToast('success', 'PDF downloaded successfully!');
     } catch (e: any) {
-      showToast('error', e.message || 'Failed to generate PDF');
+      console.warn('PDF export error, falling back to window.print():', e);
+      window.print();
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -202,7 +199,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       )}
 
       {/* Header Bar */}
-      <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none">
+      <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none no-print">
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
@@ -266,7 +263,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* LEFT: Input Editor */}
         <div
-          className={`flex-1 flex flex-col min-w-0 bg-[#151319] overflow-hidden ${
+          className={`flex-1 flex flex-col min-w-0 bg-[#151319] overflow-hidden no-print ${
             mobileView === 'preview' ? 'hidden md:flex' : 'flex'
           }`}
         >
@@ -484,7 +481,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
 
         {/* RIGHT: Live A4 Document Preview */}
         <div
-          className={`flex-1 flex flex-col min-w-0 ${
+          className={`flex-1 flex flex-col min-w-0 document-preview-column ${
             mobileView === 'editor' ? 'hidden md:flex' : 'flex'
           }`}
         >

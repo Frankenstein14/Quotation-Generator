@@ -7,6 +7,7 @@ import { TermsPaymentEditor } from './TermsPaymentEditor';
 import { QuotationDocument } from '../Preview/QuotationDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
 import { api } from '../../services/api';
+import { exportDocumentToPdf } from '../../services/pdfExporter';
 import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, Sparkles, RotateCcw } from 'lucide-react';
 
 interface QuotationEditorProps {
@@ -223,17 +224,13 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
   const handleDownloadPdf = async () => {
     try {
       setIsGeneratingPdf(true);
-      if (quotation._id || quotation.id) {
-        await api.downloadQuotationPdf(
-          (quotation._id || quotation.id)!,
-          quotation.quotationNumber
-        );
-      } else {
-        await api.previewQuotationPdf(quotation, quotation.quotationNumber);
-      }
+      await exportDocumentToPdf({
+        filename: `Quotation_${quotation.quotationNumber || 'QT'}.pdf`
+      });
       showToast('success', 'PDF downloaded successfully!');
     } catch (e: any) {
-      showToast('error', e.message || 'Failed to generate PDF');
+      console.warn('PDF export error, falling back to window.print():', e);
+      window.print();
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -297,7 +294,7 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
       )}
 
       {/* Header Bar */}
-      <header className="px-3 sm:px-6 py-2.5 sm:py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none space-y-2 sm:space-y-0">
+      <header className="px-3 sm:px-6 py-2.5 sm:py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none space-y-2 sm:space-y-0 no-print">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
@@ -387,7 +384,7 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
       <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
         {/* LEFT: Input Editor */}
         <div
-          className={`flex-1 flex flex-col min-w-0 bg-[#151319] overflow-hidden ${
+          className={`flex-1 flex flex-col min-w-0 bg-[#151319] overflow-hidden no-print ${
             mobileView === 'preview' ? 'hidden md:flex' : 'flex'
           }`}
         >
@@ -497,7 +494,7 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
 
         {/* RIGHT: Live A4 Document Preview */}
         <div
-          className={`flex-1 flex flex-col min-w-0 ${
+          className={`flex-1 flex flex-col min-w-0 document-preview-column ${
             mobileView === 'editor' ? 'hidden md:flex' : 'flex'
           }`}
         >

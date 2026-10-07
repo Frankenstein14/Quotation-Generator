@@ -48,22 +48,101 @@ body {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 0;
-  }
-  body {
-    background: transparent !important;
-    padding: 0 !important;
     margin: 0 !important;
   }
-  .no-print {
-    display: none !important;
-  }
-  .a4-document-page {
-    page-break-after: always !important;
-    break-after: page !important;
+
+  /* Force background graphics and colors */
+  *,
+  *::before,
+  *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    box-shadow: none !important;
+  }
+
+  html,
+  body {
+    width: 210mm !important;
+    height: auto !important;
     margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  /* Hide all UI elements, navigation, headers, forms, buttons */
+  header,
+  nav,
+  aside,
+  button,
+  input,
+  textarea,
+  select,
+  .no-print,
+  .editor-sidebar {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Reset outer application containers so they don't clip */
+  #root,
+  .app-layout,
+  .editor-container,
+  .document-preview-column {
+    display: block !important;
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Reset document preview canvas */
+  .document-viewer-container,
+  .document-canvas-wrapper {
+    display: block !important;
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* Reset scale transform so pages print at true 1:1 A4 dimensions */
+  #printable-document-area,
+  .document-scale-container {
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 210mm !important;
+    display: block !important;
+    position: static !important;
+  }
+
+  /* Exact A4 Document Page print properties */
+  .a4-document-page {
+    display: block !important;
+    position: relative !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    min-width: 210mm !important;
+    max-width: 210mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    page-break-before: auto !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    break-before: auto !important;
+    break-after: page !important;
+    break-inside: avoid !important;
+    overflow: hidden !important;
+    background-color: #ffffff !important;
   }
 }
