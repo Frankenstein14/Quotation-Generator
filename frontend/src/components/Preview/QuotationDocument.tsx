@@ -50,6 +50,13 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({ quotation:
           key={`inc-${ip.pageNumber}`}
           pageNumber={ip.pageNumber}
           title={ip.title}
+          metaRow={
+            ip.pageNumber > 1 ? (
+              <span className="text-[9pt] font-semibold tracking-widest text-[#555259] uppercase">
+                — Continued —
+              </span>
+            ) : undefined
+          }
         >
           <div className="flex flex-row gap-[12mm] h-full pt-[1.5mm]">
             {/* Left Column */}

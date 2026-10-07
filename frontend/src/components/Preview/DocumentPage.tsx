@@ -15,6 +15,17 @@ export const DocumentPage: React.FC<DocumentPageProps> = ({
   footerNote,
   children
 }) => {
+  // If title has " - Continued" or " - Cont.", separate it into clean title + subtitle to prevent logo overlap
+  let cleanTitle = title;
+  let autoContinued = false;
+  if (cleanTitle.includes(' - Continued')) {
+    cleanTitle = cleanTitle.replace(' - Continued', '').trim();
+    autoContinued = true;
+  } else if (cleanTitle.includes(' - Cont.')) {
+    cleanTitle = cleanTitle.replace(' - Cont.', '').trim();
+    autoContinued = true;
+  }
+
   return (
     <div className="a4-document-page shadow-2xl relative select-text text-[#222222]">
       {/* Background Frame (exact ornate maroon border, logo, watermark) */}
@@ -42,22 +53,26 @@ export const DocumentPage: React.FC<DocumentPageProps> = ({
           }}
         >
           <h1
-            className="font-bold text-center text-[#111111] tracking-wide"
+            className="font-bold text-center text-[#111111] tracking-wide max-w-[95mm] mx-auto"
             style={{
               fontFamily: "'Times New Roman', Georgia, serif",
-              fontSize: '26pt',
+              fontSize: cleanTitle.length > 14 ? '20pt' : '26pt',
               lineHeight: 1,
               letterSpacing: '1.5px'
             }}
           >
-            {title}
+            {cleanTitle}
           </h1>
-          {metaRow && (
+          {(metaRow || autoContinued) && (
             <div
-              className="mt-[3.2mm] text-[9.8pt] font-semibold text-[#222222] tracking-wide"
+              className="mt-[3.2mm] text-[9.8pt] font-semibold text-[#222222] tracking-wide max-w-[95mm] mx-auto text-center"
               style={{ fontFamily: "'Plus Jakarta Sans', Arial, sans-serif" }}
             >
-              {metaRow}
+              {metaRow || (
+                <span className="text-[9pt] font-semibold tracking-widest text-[#555259] uppercase">
+                  — Continued —
+                </span>
+              )}
             </div>
           )}
         </div>

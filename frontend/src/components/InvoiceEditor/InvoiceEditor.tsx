@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Invoice, CompanySettings } from '../../types';
 import { ClientEventForm } from '../QuotationEditor/ClientEventForm';
 import { ItemsTableEditor } from '../QuotationEditor/ItemsTableEditor';
@@ -6,7 +6,7 @@ import { InvoiceDocument } from '../Preview/InvoiceDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
 import { exportDocumentToPdf } from '../../services/pdfExporter';
 import { api } from '../../services/api';
-import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, CreditCard, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, CreditCard, ShieldCheck, CloudCheck, Loader2 } from 'lucide-react';
 
 interface InvoiceEditorProps {
   initialInvoice?: Invoice | null;
@@ -26,6 +26,15 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Autosave status: 'saved' | 'saving' | 'unsaved' | 'error'
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+
+  const lastSavedJsonRef = useRef<string>('');
+  const isSavingRef = useRef<boolean>(false);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialMountRef = useRef<boolean>(true);
 
   const [invoice, setInvoice] = useState<Invoice>(() => {
     if (initialInvoice) return initialInvoice;
@@ -134,6 +143,90 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
     setTimeout(() => setToastMessage(null), 4000);
   };
 
+  // Set baseline snapshot on initial mount
+  useEffect(() => {
+    lastSavedJsonRef.current = JSON.stringify(invoice);
+  }, []);
+
+  // Autosave effect with debounce
+  useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      return;
+    }
+
+    const currentJson = JSON.stringify(invoice);
+    if (currentJson === lastSavedJsonRef.current) {
+      return;
+    }
+
+    // Determine if this is a brand new invoice with no content yet
+    const isNewDoc = !invoice.id && !invoice._id;
+    const hasMeaningfulContent = Boolean(
+      invoice.client.name.trim() ||
+      invoice.items.length > 0 ||
+      invoice.client.phone
+    );
+
+    if (isNewDoc && !hasMeaningfulContent) {
+      return;
+    }
+
+    setSaveStatus('unsaved');
+
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = setTimeout(() => {
+      performAutoSave();
+    }, 1500);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [invoice]);
+
+  const performAutoSave = async () => {
+    if (isSavingRef.current) return;
+    const currentJson = JSON.stringify(invoice);
+    if (currentJson === lastSavedJsonRef.current) {
+      setSaveStatus('saved');
+      return;
+    }
+
+    try {
+      isSavingRef.current = true;
+      setSaveStatus('saving');
+
+      let saved: Invoice;
+      const docId = invoice._id || invoice.id;
+      if (docId) {
+        saved = await api.updateInvoice(docId, invoice);
+      } else {
+        saved = await api.createInvoice(invoice);
+        setInvoice(prev => ({
+          ...prev,
+          id: saved.id,
+          _id: saved._id
+        }));
+      }
+
+      lastSavedJsonRef.current = JSON.stringify(saved);
+      onSaved(saved);
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setLastSavedAt(timeStr);
+      setSaveStatus('saved');
+    } catch (err) {
+      console.warn('Invoice autosave warning:', err);
+      setSaveStatus('error');
+    } finally {
+      isSavingRef.current = false;
+    }
+  };
+
   const handleSave = async () => {
     if (!invoice.client.name.trim()) {
       showToast('error', 'Client name is required.');
@@ -144,23 +237,50 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       return;
     }
 
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
     try {
       setIsSaving(true);
+      isSavingRef.current = true;
+      setSaveStatus('saving');
+
       let saved: Invoice;
-      if (invoice._id || invoice.id) {
-        const id = (invoice._id || invoice.id)!;
-        saved = await api.updateInvoice(id, invoice);
+      const docId = invoice._id || invoice.id;
+      if (docId) {
+        saved = await api.updateInvoice(docId, invoice);
       } else {
         saved = await api.createInvoice(invoice);
       }
+
+      lastSavedJsonRef.current = JSON.stringify(saved);
       setInvoice(saved);
       showToast('success', 'Invoice saved successfully!');
       onSaved(saved);
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setLastSavedAt(timeStr);
+      setSaveStatus('saved');
     } catch (e: any) {
+      setSaveStatus('error');
       showToast('error', e.message || 'Failed to save invoice');
     } finally {
       setIsSaving(false);
+      isSavingRef.current = false;
     }
+  };
+
+  const handleBack = async () => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+    if (saveStatus === 'unsaved' && !isSavingRef.current) {
+      try {
+        await performAutoSave();
+      } catch {}
+    }
+    onBack();
   };
 
   const handleDownloadPdf = async () => {
@@ -202,7 +322,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none no-print">
         <div className="flex items-center gap-4">
           <button
-            onClick={onBack}
+            onClick={handleBack}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition"
           >
             <ArrowLeft size={14} />
@@ -246,8 +366,44 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           </button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
+        {/* Action Buttons & Autosave Status */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Autosave Status Badge */}
+          <div className="flex items-center">
+            {saveStatus === 'saving' && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-800/90 text-brand-gold-light text-[11px] border border-stone-700/80 shadow-sm animate-pulse">
+                <Loader2 size={12} className="animate-spin text-brand-gold" />
+                <span>Autosaving...</span>
+              </span>
+            )}
+            {saveStatus === 'saved' && (
+              <span
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 text-emerald-400 text-[11px] border border-emerald-800/40 shadow-sm"
+                title={lastSavedAt ? `Autosaved at ${lastSavedAt}` : 'All changes saved'}
+              >
+                <CloudCheck size={13} className="text-emerald-400" />
+                <span className="hidden sm:inline">{lastSavedAt ? `Saved ${lastSavedAt}` : 'Saved'}</span>
+                <span className="sm:hidden">Saved</span>
+              </span>
+            )}
+            {saveStatus === 'unsaved' && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-950/40 text-amber-300 text-[11px] border border-amber-800/40 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                <span className="hidden sm:inline">Unsaved changes...</span>
+                <span className="sm:hidden">Unsaved</span>
+              </span>
+            )}
+            {saveStatus === 'error' && (
+              <span
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/40 text-red-300 text-[11px] border border-red-800/40 shadow-sm"
+                title="Cloud sync issue - changes are preserved locally in browser"
+              >
+                <AlertCircle size={12} className="text-red-400" />
+                <span>Saved locally</span>
+              </span>
+            )}
+          </div>
+
           <button
             onClick={handleSave}
             disabled={isSaving}

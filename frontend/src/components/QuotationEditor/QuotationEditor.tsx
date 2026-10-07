@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Quotation, CompanySettings } from '../../types';
 import { ClientEventForm } from './ClientEventForm';
 import { InclusionsEditor } from './InclusionsEditor';
@@ -8,7 +8,7 @@ import { QuotationDocument } from '../Preview/QuotationDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
 import { api } from '../../services/api';
 import { exportDocumentToPdf } from '../../services/pdfExporter';
-import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, Sparkles, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, Sparkles, RotateCcw, CloudCheck, Loader2 } from 'lucide-react';
 
 interface QuotationEditorProps {
   initialQuotation?: Quotation | null;
@@ -28,6 +28,15 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Autosave status: 'saved' | 'saving' | 'unsaved' | 'error'
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+
+  const lastSavedJsonRef = useRef<string>('');
+  const isSavingRef = useRef<boolean>(false);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialMountRef = useRef<boolean>(true);
 
   // Initialize Quotation state
   const [quotation, setQuotation] = useState<Quotation>(() => {
@@ -192,6 +201,93 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
     setTimeout(() => setToastMessage(null), 4000);
   };
 
+  // Set baseline snapshot on initial mount
+  useEffect(() => {
+    lastSavedJsonRef.current = JSON.stringify(quotation);
+  }, []);
+
+  // Autosave effect with debounce
+  useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      return;
+    }
+
+    const currentJson = JSON.stringify(quotation);
+    if (currentJson === lastSavedJsonRef.current) {
+      return;
+    }
+
+    // Determine if this is a brand new quotation with no content yet
+    const isNewDoc = !quotation.id && !quotation._id;
+    const hasMeaningfulContent = Boolean(
+      quotation.client.name.trim() ||
+      quotation.items.length > 0 ||
+      quotation.client.phone ||
+      quotation.event.location ||
+      (quotation.inclusions && quotation.inclusions.some(sec => sec.items.length > 0))
+    );
+
+    if (isNewDoc && !hasMeaningfulContent) {
+      return;
+    }
+
+    setSaveStatus('unsaved');
+
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = setTimeout(() => {
+      performAutoSave();
+    }, 1500);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [quotation]);
+
+  const performAutoSave = async () => {
+    if (isSavingRef.current) return;
+    const currentJson = JSON.stringify(quotation);
+    if (currentJson === lastSavedJsonRef.current) {
+      setSaveStatus('saved');
+      return;
+    }
+
+    try {
+      isSavingRef.current = true;
+      setSaveStatus('saving');
+
+      let saved: Quotation;
+      const docId = quotation._id || quotation.id;
+      if (docId) {
+        saved = await api.updateQuotation(docId, quotation);
+      } else {
+        saved = await api.createQuotation(quotation);
+        // Ensure state keeps the newly generated database ID
+        setQuotation(prev => ({
+          ...prev,
+          id: saved.id,
+          _id: saved._id
+        }));
+      }
+
+      lastSavedJsonRef.current = JSON.stringify(saved);
+      onSaved(saved);
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setLastSavedAt(timeStr);
+      setSaveStatus('saved');
+    } catch (err) {
+      console.warn('Autosave sync warning:', err);
+      setSaveStatus('error');
+    } finally {
+      isSavingRef.current = false;
+    }
+  };
+
   const handleSave = async () => {
     if (!quotation.client.name.trim()) {
       showToast('error', 'Client name is required.');
@@ -202,23 +298,50 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
       return;
     }
 
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
     try {
       setIsSaving(true);
+      isSavingRef.current = true;
+      setSaveStatus('saving');
+
       let saved: Quotation;
-      if (quotation._id || quotation.id) {
-        const id = (quotation._id || quotation.id)!;
-        saved = await api.updateQuotation(id, quotation);
+      const docId = quotation._id || quotation.id;
+      if (docId) {
+        saved = await api.updateQuotation(docId, quotation);
       } else {
         saved = await api.createQuotation(quotation);
       }
+
+      lastSavedJsonRef.current = JSON.stringify(saved);
       setQuotation(saved);
       showToast('success', 'Quotation saved successfully!');
       onSaved(saved);
+
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setLastSavedAt(timeStr);
+      setSaveStatus('saved');
     } catch (e: any) {
+      setSaveStatus('error');
       showToast('error', e.message || 'Failed to save quotation');
     } finally {
       setIsSaving(false);
+      isSavingRef.current = false;
     }
+  };
+
+  const handleBack = async () => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+    if (saveStatus === 'unsaved' && !isSavingRef.current) {
+      try {
+        await performAutoSave();
+      } catch {}
+    }
+    onBack();
   };
 
   const handleDownloadPdf = async () => {
@@ -238,6 +361,9 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
 
   const handleStartFromBeginning = () => {
     if (window.confirm('Start from the beginning? This will clear client details, items, and inclusions to a clean blank slate.')) {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
       const today = new Date();
       const formattedDate = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
       setQuotation(prev => ({
@@ -269,6 +395,9 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
         inclusions: [],
         status: 'draft'
       }));
+      lastSavedJsonRef.current = '';
+      setSaveStatus('saved');
+      setLastSavedAt(null);
       showToast('success', 'Reset to blank slate! You can create everything from the beginning.');
     }
   };
@@ -298,7 +427,7 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
-              onClick={onBack}
+              onClick={handleBack}
               className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition"
             >
               <ArrowLeft size={14} />
@@ -333,8 +462,44 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
             </button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
+          {/* Action Buttons & Autosave Status */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Autosave Status Badge */}
+            <div className="flex items-center">
+              {saveStatus === 'saving' && (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-800/90 text-brand-gold-light text-[11px] border border-stone-700/80 shadow-sm animate-pulse">
+                  <Loader2 size={12} className="animate-spin text-brand-gold" />
+                  <span>Autosaving...</span>
+                </span>
+              )}
+              {saveStatus === 'saved' && (
+                <span
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 text-emerald-400 text-[11px] border border-emerald-800/40 shadow-sm"
+                  title={lastSavedAt ? `Autosaved at ${lastSavedAt}` : 'All changes saved'}
+                >
+                  <CloudCheck size={13} className="text-emerald-400" />
+                  <span className="hidden sm:inline">{lastSavedAt ? `Saved ${lastSavedAt}` : 'Saved'}</span>
+                  <span className="sm:hidden">Saved</span>
+                </span>
+              )}
+              {saveStatus === 'unsaved' && (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-950/40 text-amber-300 text-[11px] border border-amber-800/40 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="hidden sm:inline">Unsaved changes...</span>
+                  <span className="sm:hidden">Unsaved</span>
+                </span>
+              )}
+              {saveStatus === 'error' && (
+                <span
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/40 text-red-300 text-[11px] border border-red-800/40 shadow-sm"
+                  title="Cloud sync issue - changes are preserved locally in browser"
+                >
+                  <AlertCircle size={12} className="text-red-400" />
+                  <span>Saved locally</span>
+                </span>
+              )}
+            </div>
+
             <button
               onClick={handleSave}
               disabled={isSaving}

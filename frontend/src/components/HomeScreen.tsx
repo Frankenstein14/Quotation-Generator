@@ -229,7 +229,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       </span>
                       <span className="font-semibold text-sm text-stone-100 flex items-center gap-1.5">
                         <User size={13} className="text-stone-400" />
-                        {q.client.name}
+                        {q.client.name || 'Untitled Client'}
                       </span>
                       <span className="text-xs text-stone-400 bg-stone-800/80 px-2 py-0.5 rounded">
                         {q.event.type}
@@ -307,7 +307,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                       </span>
                       <span className="font-semibold text-sm text-stone-100 flex items-center gap-1.5">
                         <User size={13} className="text-stone-400" />
-                        {inv.client.name}
+                        {inv.client.name || 'Untitled Client'}
                       </span>
                       <span className="text-xs text-stone-400 bg-stone-800/80 px-2 py-0.5 rounded">
                         {inv.event.type}

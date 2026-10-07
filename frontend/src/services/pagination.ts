@@ -105,7 +105,7 @@ export function paginateInclusions(sections: InclusionSection[], startingPage: n
         if (availLines < 5) {
           pages.push({
             pageNumber: currentPageNumber++,
-            title: pages.length === 0 ? 'INCLUSIONS' : 'INCLUSIONS - Continued',
+            title: 'INCLUSIONS',
             leftColumn: currentLeft,
             rightColumn: currentRight
           });
@@ -155,7 +155,7 @@ export function paginateInclusions(sections: InclusionSection[], startingPage: n
     // Flush current page and start next
     pages.push({
       pageNumber: currentPageNumber++,
-      title: pages.length === 0 ? 'INCLUSIONS' : 'INCLUSIONS - Continued',
+      title: 'INCLUSIONS',
       leftColumn: currentLeft,
       rightColumn: currentRight
     });
@@ -173,7 +173,7 @@ export function paginateInclusions(sections: InclusionSection[], startingPage: n
   if (currentLeft.length > 0 || currentRight.length > 0) {
     pages.push({
       pageNumber: currentPageNumber,
-      title: pages.length === 0 ? 'INCLUSIONS' : 'INCLUSIONS - Continued',
+      title: 'INCLUSIONS',
       leftColumn: currentLeft,
       rightColumn: currentRight
     });
@@ -214,7 +214,7 @@ export function paginateQuotationItems(items: LineItem[], quotationNumber: strin
 
     pages.push({
       pageNumber: startingPage + pageIndex,
-      title: isFirst ? 'QUOTATION' : 'QUOTATION - Continued',
+      title: 'QUOTATION',
       quotationNumber,
       isFirstItemsPage: isFirst,
       isLastItemsPage: isLast,
@@ -253,7 +253,7 @@ export function paginateTerms(terms: string[], quotationNumber: string, starting
 
     pages.push({
       pageNumber: startingPage + pageIndex,
-      title: isFirst ? 'QUOTATION' : 'QUOTATION - Terms & Conditions (Cont.)',
+      title: 'QUOTATION',
       quotationNumber,
       isFirstTermsPage: isFirst,
       terms: chunk
@@ -294,7 +294,7 @@ export function paginateInvoice(items: LineItem[], terms: string[], invoiceNumbe
 
     pages.push({
       pageNumber: pageIndex + 1,
-      title: isFirst ? 'INVOICE' : 'INVOICE - Continued',
+      title: 'INVOICE',
       invoiceNumber,
       isFirstPage: isFirst,
       isLastPage: isLast,
