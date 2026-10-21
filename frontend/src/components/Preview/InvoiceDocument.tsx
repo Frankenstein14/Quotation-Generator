@@ -109,48 +109,52 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice: inv }
               </>
             )}
 
-            {/* Items Table */}
-            <table className="w-full border-collapse mt-[1mm]">
+            {/* Optional Schedule / Methods Header */}
+            {(inv.paymentScheduleTitle || (ip.isFirstPage && inv.items.some(i => i.status))) && (
+              <div className="text-[10pt] font-bold text-[#111111] mb-[1.5mm] tracking-wide">
+                {inv.paymentScheduleTitle || 'Payments methods'}
+              </div>
+            )}
+
+            {/* Items Table - Invoice Format: Description | Value | Status */}
+            <table className="w-full border-collapse mt-[0.5mm]">
               <thead>
-                <tr>
-                  <th className="text-[9.5pt] font-bold text-[#111111] text-left py-[2.2mm] px-[3mm] w-[44%] tracking-wide">
-                    ITEM
+                <tr className="border-b-[1.5px] border-[#111111]">
+                  <th className="text-[9.5pt] font-bold text-[#111111] text-left py-[2.2mm] px-[3mm] w-[58%] tracking-wide">
+                    Description
                   </th>
-                  <th className="text-[9.5pt] font-bold text-[#111111] text-center py-[2.2mm] px-[3mm] w-[20%] tracking-wide">
-                    UNIT PRICE
+                  <th className="text-[9.5pt] font-bold text-[#111111] text-right py-[2.2mm] px-[3mm] w-[24%] tracking-wide">
+                    Value
                   </th>
-                  <th className="text-[9.5pt] font-bold text-[#111111] text-center py-[2.2mm] px-[3mm] w-[14%] tracking-wide">
-                    QTY
-                  </th>
-                  <th className="text-[9.5pt] font-bold text-[#111111] text-right py-[2.2mm] px-[3mm] w-[22%] tracking-wide">
-                    TOTAL
+                  <th className="text-[9.5pt] font-bold text-[#111111] text-center py-[2.2mm] px-[3mm] w-[18%] tracking-wide">
+                    Status
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {ip.items.map((item, idx) => {
-                  const itemNum = ((ip.pageNumber - 1) * 10) + idx + 1;
                   const isAlt = idx % 2 === 0;
-                  const qtyDisplay = item.quantity !== undefined && item.quantity !== null && String(item.quantity).trim() !== '' && String(item.quantity).trim() !== '1'
-                    ? `${item.quantity}${item.unit ? ` ${item.unit}` : ''}`
-                    : '-';
+                  const isPaid = (item.status || '').trim().toUpperCase() === 'PAID';
 
                   return (
                     <tr
                       key={item.id || idx}
                       className={isAlt ? 'bg-[#F7EDEE]' : 'bg-transparent'}
                     >
-                      <td className="text-[9.2pt] py-[2.1mm] px-[3mm] text-[#222222] font-medium text-left">
-                        {itemNum}. {item.description}
+                      <td className="text-[9.2pt] py-[2.4mm] px-[3mm] text-[#222222] font-medium text-left">
+                        {item.description}
                       </td>
-                      <td className="text-[9.2pt] py-[2.1mm] px-[3mm] text-[#222222] text-center">
-                        {item.rate ? formatCurrency(item.rate) : '-'}
-                      </td>
-                      <td className="text-[9.2pt] py-[2.1mm] px-[3mm] text-[#222222] text-center">
-                        {qtyDisplay}
-                      </td>
-                      <td className="text-[9.2pt] py-[2.1mm] px-[3mm] text-[#222222] text-right font-medium">
+                      <td className="text-[9.2pt] py-[2.4mm] px-[3mm] text-[#222222] text-right font-medium font-mono">
                         {formatCurrency(item.amount)}
+                      </td>
+                      <td className="text-[9.2pt] py-[2.4mm] px-[3mm] text-center">
+                        {isPaid ? (
+                          <span className="font-bold text-[#111111] tracking-wider text-[9pt]">PAID</span>
+                        ) : item.status ? (
+                          <span className="font-medium text-[#444444] text-[8.5pt]">{item.status}</span>
+                        ) : (
+                          <span className="text-[#888888]">-</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -161,9 +165,8 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice: inv }
                   return (
                     <tr
                       key={`empty-${rIdx}`}
-                      className={`h-[6.2mm] ${isAlt ? 'bg-[#F7EDEE]' : 'bg-transparent'}`}
+                      className={`h-[6.5mm] ${isAlt ? 'bg-[#F7EDEE]' : 'bg-transparent'}`}
                     >
-                      <td className="px-[3mm]">&nbsp;</td>
                       <td className="px-[3mm]">&nbsp;</td>
                       <td className="px-[3mm]">&nbsp;</td>
                       <td className="px-[3mm]">&nbsp;</td>
@@ -177,66 +180,76 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice: inv }
             {/* Totals Summary */}
             {ip.isLastPage ? (
               <>
-                <div className="flex justify-end pt-[2.5mm] pb-[1mm]">
-                  <div className="flex flex-col gap-[1.5mm] w-[72mm]">
-                    <div className="flex justify-end items-center text-[9.5pt]">
-                      <span className="font-semibold text-[#222222] text-right flex-1">Subtotal</span>
-                      <span className="mx-[3.5mm] font-semibold">:</span>
-                      <span className="w-[32mm] text-right font-semibold text-[#111111]">
-                        {formatCurrency(inv.subtotal)}
-                      </span>
-                    </div>
-                    {Boolean(inv.discountAmount && inv.discountAmount > 0) && (
-                      <div className="flex justify-end items-center text-[9.5pt]">
-                        <span className="font-semibold text-[#222222] text-right flex-1">
-                          Discount {inv.discountType === 'percentage' ? `(${inv.discountValue}%)` : ''}
-                        </span>
-                        <span className="mx-[3.5mm] font-semibold">:</span>
-                        <span className="w-[32mm] text-right font-semibold text-[#111111]">
-                          - {formatCurrency(inv.discountAmount)}
-                        </span>
-                      </div>
-                    )}
-                    {Boolean(inv.taxAmount && inv.taxAmount > 0) && (
-                      <div className="flex justify-end items-center text-[9.5pt]">
-                        <span className="font-semibold text-[#222222] text-right flex-1">
-                          GST / Tax ({inv.taxPercentage}%)
-                        </span>
-                        <span className="mx-[3.5mm] font-semibold">:</span>
-                        <span className="w-[32mm] text-right font-semibold text-[#111111]">
-                          {formatCurrency(inv.taxAmount)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex justify-end items-center text-[10.5pt] font-bold">
-                      <span className="text-[#111111] text-right flex-1">
-                        Grand Total
-                      </span>
-                      <span className="mx-[3.5mm] font-bold">:</span>
-                      <span className="w-[32mm] text-right font-bold text-[#111111]">
-                        {formatCurrency(inv.grandTotal)}
-                      </span>
-                    </div>
-                    {inv.amountPaid !== undefined && inv.amountPaid > 0 && (
-                      <>
-                        <div className="flex justify-end items-center text-[9pt] mt-[1mm]">
-                          <span className="font-semibold text-[#222222] text-right flex-1">Amount Paid</span>
-                          <span className="mx-[3.5mm] font-semibold">:</span>
-                          <span className="w-[32mm] text-right font-semibold text-emerald-700">
-                            {formatCurrency(inv.amountPaid)}
+                {(() => {
+                  const paidFromItems = (inv.items || [])
+                    .filter(i => (i.status || '').trim().toUpperCase() === 'PAID')
+                    .reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+                  const effectivePaid = inv.amountPaid !== undefined ? inv.amountPaid : paidFromItems;
+                  const balanceValue = inv.balanceDue !== undefined
+                    ? inv.balanceDue
+                    : Math.max(0, (inv.grandTotal || inv.subtotal || 0) - effectivePaid);
+
+                  return (
+                    <div className="flex justify-end pt-[2.5mm] pb-[1mm]">
+                      <div className="flex flex-col gap-[1.8mm] w-[75mm]">
+                        <div className="flex justify-between items-center text-[9.8pt]">
+                          <span className="font-semibold text-[#222222]">Subtotal</span>
+                          <span className="font-semibold text-[#111111] font-mono text-right">
+                            {formatCurrency(inv.subtotal)}
                           </span>
                         </div>
-                        <div className="flex justify-end items-center text-[9.5pt] font-bold">
-                          <span className="text-[#111111] text-right flex-1">Balance Due</span>
-                          <span className="mx-[3.5mm] font-bold">:</span>
-                          <span className="w-[32mm] text-right font-bold text-red-700">
-                            {formatCurrency(inv.balanceDue ?? (inv.grandTotal - inv.amountPaid))}
+
+                        {Boolean(inv.discountAmount && inv.discountAmount > 0) && (
+                          <div className="flex justify-between items-center text-[9.2pt]">
+                            <span className="font-medium text-[#222222]">
+                              Discount {inv.discountType === 'percentage' ? `(${inv.discountValue}%)` : ''}
+                            </span>
+                            <span className="font-medium text-[#111111] font-mono text-right">
+                              - {formatCurrency(inv.discountAmount)}
+                            </span>
+                          </div>
+                        )}
+
+                        {Boolean(inv.taxAmount && inv.taxAmount > 0) && (
+                          <div className="flex justify-between items-center text-[9.2pt]">
+                            <span className="font-medium text-[#222222]">
+                              GST / Tax ({inv.taxPercentage}%)
+                            </span>
+                            <span className="font-medium text-[#111111] font-mono text-right">
+                              {formatCurrency(inv.taxAmount)}
+                            </span>
+                          </div>
+                        )}
+
+                        {(Boolean(inv.discountAmount) || Boolean(inv.taxAmount)) && (
+                          <div className="flex justify-between items-center text-[10pt] font-bold">
+                            <span className="text-[#111111]">Grand Total</span>
+                            <span className="font-bold text-[#111111] font-mono text-right">
+                              {formatCurrency(inv.grandTotal)}
+                            </span>
+                          </div>
+                        )}
+
+                        {effectivePaid > 0 && (
+                          <div className="flex justify-between items-center text-[9pt] text-[#444444]">
+                            <span className="font-medium">Amount Paid</span>
+                            <span className="font-semibold text-emerald-800 font-mono text-right">
+                              {formatCurrency(effectivePaid)}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Balance Badge (White bold text on solid black badge) */}
+                        <div className="flex justify-between items-center pt-[1.5mm]">
+                          <span className="font-bold text-[#111111] text-[10.5pt]">Balance</span>
+                          <span className="bg-[#111111] text-white px-3.5 py-1 rounded-[4px] font-bold font-mono text-[10.5pt] tracking-wide shadow-sm">
+                            {formatCurrency(balanceValue)}
                           </span>
                         </div>
-                      </>
-                    )}
-                  </div>
-                </div>
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="w-full h-[1.2px] bg-[#222222] mt-[3.5mm] mb-[2mm]"></div>
 
                 {/* Bottom row: Payment info + Signatory */}

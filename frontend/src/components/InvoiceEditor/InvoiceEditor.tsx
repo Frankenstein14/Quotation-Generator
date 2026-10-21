@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Invoice, CompanySettings } from '../../types';
 import { ClientEventForm } from '../QuotationEditor/ClientEventForm';
-import { ItemsTableEditor } from '../QuotationEditor/ItemsTableEditor';
+import { InvoiceItemsEditor } from './InvoiceItemsEditor';
 import { InvoiceDocument } from '../Preview/InvoiceDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
 import { exportDocumentToPdf } from '../../services/pdfExporter';
@@ -60,21 +60,22 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
         location: 'Sholinganallur',
         guestCount: '300'
       },
+      paymentScheduleTitle: 'Payments methods',
       items: [
-        { id: '1', description: 'Decoration & Stage Setup', quantity: 1, unit: 'Kit', rate: 35000, amount: 35000 },
-        { id: '2', description: 'Traditional & Candid Photography', quantity: 1, unit: 'Package', rate: 45000, amount: 45000 },
-        { id: '3', description: 'Fresh Flower Garland Set', quantity: 1, unit: 'Set', rate: 8000, amount: 8000 },
-        { id: '4', description: 'Catering Service (Morning & Lunch)', quantity: 1, unit: 'Service', rate: 154000, amount: 154000 },
-        { id: '5', description: 'Return Gifts with Customized Kit', quantity: 200, unit: 'Nos', rate: 75, amount: 15000 }
+        { id: '1', description: 'first stage : 30% OCT', amount: 75000, status: 'PAID' },
+        { id: '2', description: 'second stage : 40% NOV', amount: 98000, status: '' },
+        { id: '3', description: 'Third stage : 30% (end of the event)', amount: 72000, status: '' }
       ],
-      subtotal: 257000,
+      subtotal: 245000,
       discountType: 'fixed',
       discountValue: 0,
       discountAmount: 0,
       taxPercentage: 0,
       taxAmount: 0,
-      grandTotal: 257000,
+      grandTotal: 245000,
       manualGrandTotal: false,
+      amountPaid: 75000,
+      balanceDue: 170000,
       terms: [
         'Payment is due on or before the due date mentioned.',
         'Cheques to be drawn in favor of KALAKAR EVENTS.',
@@ -105,9 +106,9 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
     }
   }, [initialInvoice]);
 
-  // Recalculate Subtotal and Grand Total whenever items, discount, or tax change
+  // Recalculate Subtotal, Grand Total, and Balance whenever items, discount, or tax change
   useEffect(() => {
-    const sub = invoice.items.reduce((acc, it) => acc + (it.amount || 0), 0);
+    const sub = invoice.items.reduce((acc, it) => acc + (Number(it.amount) || 0), 0);
 
     let discAmt = 0;
     if (invoice.discountType === 'percentage') {
@@ -123,20 +124,29 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
     }
 
     const calculatedGrand = afterDiscount + taxAmt;
+    const finalGrand = invoice.manualGrandTotal ? invoice.grandTotal : calculatedGrand;
+
+    const autoPaid = invoice.items
+      .filter(i => (i.status || '').trim().toUpperCase() === 'PAID')
+      .reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+    const effectivePaid = invoice.amountPaid !== undefined ? invoice.amountPaid : autoPaid;
+    const calculatedBalance = Math.max(0, finalGrand - effectivePaid);
 
     setInvoice(prev => ({
       ...prev,
       subtotal: sub,
       discountAmount: discAmt,
       taxAmount: taxAmt,
-      grandTotal: prev.manualGrandTotal ? prev.grandTotal : calculatedGrand
+      grandTotal: finalGrand,
+      balanceDue: calculatedBalance
     }));
   }, [
     invoice.items,
     invoice.discountType,
     invoice.discountValue,
     invoice.taxPercentage,
-    invoice.manualGrandTotal
+    invoice.manualGrandTotal,
+    invoice.amountPaid
   ]);
 
   const showToast = (type: 'success' | 'error', text: string) => {
@@ -501,7 +511,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           {/* Tab Contents: Scrollable */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
             {activeTab === 'items' && (
-              <ItemsTableEditor
+              <InvoiceItemsEditor
                 items={invoice.items}
                 onItemsChange={(items) => setInvoice(prev => ({ ...prev, items }))}
                 subtotal={invoice.subtotal}
@@ -517,6 +527,11 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                 onGrandTotalChange={(grandTotal) => setInvoice(prev => ({ ...prev, grandTotal }))}
                 manualGrandTotal={invoice.manualGrandTotal}
                 onManualGrandTotalChange={(manualGrandTotal) => setInvoice(prev => ({ ...prev, manualGrandTotal }))}
+                paymentScheduleTitle={invoice.paymentScheduleTitle}
+                onPaymentScheduleTitleChange={(paymentScheduleTitle) => setInvoice(prev => ({ ...prev, paymentScheduleTitle }))}
+                amountPaid={invoice.amountPaid}
+                onAmountPaidChange={(amountPaid) => setInvoice(prev => ({ ...prev, amountPaid }))}
+                balanceDue={invoice.balanceDue}
               />
             )}
 
