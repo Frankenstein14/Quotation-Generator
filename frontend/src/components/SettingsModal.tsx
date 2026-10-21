@@ -56,6 +56,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    try {
+      setIsUploading(true);
+      const res = await api.uploadSignature(file);
+      setSettings(prev => ({ ...prev, signatureUrl: res.signatureUrl }));
+    } catch (err: any) {
+      alert('Signature upload failed: ' + err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveSignature = async () => {
+    try {
+      setIsUploading(true);
+      await api.updateSettings({ signatureUrl: '' });
+      setSettings(prev => ({ ...prev, signatureUrl: '' }));
+    } catch (err: any) {
+      alert('Failed to remove signature: ' + err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleAddTerm = () => {
     if (!newTermInput.trim()) return;
     setSettings(prev => ({
@@ -223,6 +249,53 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </label>
                 <p className="text-[11px] text-stone-500 mt-1">
                   Recommended: PNG or JPG with transparent or clean background
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Default Digital Signature */}
+          <div className="pt-4 border-t border-stone-800">
+            <h3 className="text-xs font-serif font-bold uppercase tracking-wider text-brand-gold-light mb-3">
+              Default Digital Signature (for Invoices)
+            </h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="w-36 h-16 rounded-xl bg-white border border-stone-700 flex items-center justify-center overflow-hidden p-1 shadow-inner">
+                {settings.signatureUrl ? (
+                  <img
+                    src={settings.signatureUrl}
+                    alt="Company Signature"
+                    className="w-full h-full object-contain select-none"
+                  />
+                ) : (
+                  <span className="text-[10px] text-stone-400 font-medium">No signature</span>
+                )}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center gap-2">
+                  <label className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 border border-stone-700 rounded-lg text-xs font-semibold cursor-pointer transition">
+                    <Upload size={14} />
+                    <span>{isUploading ? 'Uploading...' : settings.signatureUrl ? 'Change Signature' : 'Upload Signature'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSignatureUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  {settings.signatureUrl && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveSignature}
+                      className="px-2.5 py-1.5 bg-red-950/30 hover:bg-red-950/50 text-red-400 border border-red-900/40 rounded-lg text-xs font-medium transition flex items-center gap-1"
+                    >
+                      <Trash2 size={13} />
+                      <span>Remove</span>
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px] text-stone-500">
+                  Pre-populates the signature above the Authorized Signatory line on invoices
                 </p>
               </div>
             </div>

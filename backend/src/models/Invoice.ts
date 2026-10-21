@@ -47,6 +47,7 @@ const InvoiceSchema = new Schema<Invoice>({
     upiId: { type: String, default: '' }
   },
   signatureText: { type: String, default: 'Authorized Signatory' },
+  signatureUrl: { type: String, default: '' },
   status: { type: String, enum: ['unpaid', 'paid', 'overdue'], default: 'unpaid' }
 }, { timestamps: true });
 

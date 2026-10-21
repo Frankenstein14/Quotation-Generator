@@ -8,6 +8,7 @@ export interface CompanySettings {
   website?: string;
   instagram?: string;
   logoUrl?: string;
+  signatureUrl?: string;
   bankName: string;
   accountName: string;
   accountNumber: string;
@@ -41,6 +42,7 @@ export interface LineItem {
   unit?: string;
   rate?: number | string;
   amount: number;
+  status?: string; // e.g. 'PAID', 'Pending', or '' for invoice
 }
 
 export interface InclusionSection {
@@ -85,6 +87,7 @@ export interface Invoice {
   company: CompanySettings;
   client: ClientDetails;
   event: EventDetails;
+  paymentScheduleTitle?: string; // Optional section title e.g. "Payments methods"
   items: LineItem[];
   subtotal: number;
   discountType: 'fixed' | 'percentage';
@@ -106,6 +109,7 @@ export interface Invoice {
     upiId?: string;
   };
   signatureText?: string;
+  signatureUrl?: string;
   status: 'unpaid' | 'paid' | 'overdue';
   createdAt?: string;
   updatedAt?: string;

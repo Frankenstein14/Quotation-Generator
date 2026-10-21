@@ -276,10 +276,20 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice: inv }
 
                   <div className="flex-1 flex justify-end items-end">
                     <div className="text-center w-[55mm]">
-                      <div className="text-[8.5pt] font-semibold text-[#444444] mb-[12mm]">
+                      <div className="text-[8.5pt] font-semibold text-[#444444] mb-[1.5mm]">
                         For {inv.company.companyName}
                       </div>
-                      <div className="h-[12mm]"></div>
+                      <div className="h-[21mm] flex items-center justify-center relative overflow-hidden">
+                        {(inv.signatureUrl || inv.company?.signatureUrl) ? (
+                          <img
+                            src={inv.signatureUrl || inv.company?.signatureUrl}
+                            alt="Digital Signature"
+                            className="max-h-[20mm] max-w-[50mm] object-contain select-none"
+                          />
+                        ) : (
+                          <div className="h-[20mm]" />
+                        )}
+                      </div>
                       <div className="border-t border-[#333333] pt-[1.5mm] text-[8.5pt] font-semibold text-[#222222]">
                         {inv.signatureText || 'Authorized Signatory'}
                       </div>

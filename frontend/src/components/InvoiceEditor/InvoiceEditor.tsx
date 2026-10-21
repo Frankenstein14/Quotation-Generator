@@ -6,7 +6,7 @@ import { InvoiceDocument } from '../Preview/InvoiceDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
 import { exportDocumentToPdf } from '../../services/pdfExporter';
 import { api } from '../../services/api';
-import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, CreditCard, ShieldCheck, CloudCheck, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, CreditCard, ShieldCheck, CloudCheck, Loader2, Upload, Trash2 } from 'lucide-react';
 
 interface InvoiceEditorProps {
   initialInvoice?: Invoice | null;
@@ -89,6 +89,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
         upiId: defaultSettings.upiId
       },
       signatureText: 'Authorized Signatory',
+      signatureUrl: defaultSettings.signatureUrl || undefined,
       status: 'unpaid'
     };
   });
@@ -296,6 +297,44 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
     } finally {
       setIsGeneratingPdf(false);
     }
+  };
+
+  const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('error', 'Please select a valid image file (PNG, JPG, SVG).');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('error', 'Signature file size should be less than 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setInvoice(prev => ({
+        ...prev,
+        signatureUrl: result
+      }));
+      showToast('success', 'Digital signature uploaded successfully!');
+    };
+    reader.onerror = () => {
+      showToast('error', 'Failed to read image file.');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleRemoveSignature = () => {
+    setInvoice(prev => ({
+      ...prev,
+      signatureUrl: undefined
+    }));
+    showToast('success', 'Digital signature removed.');
   };
 
   return (
@@ -606,6 +645,84 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Digital Signature Upload Card */}
+                <div className="bg-[#1c1920] border border-stone-800 rounded-xl p-5 shadow-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-3 border-b border-stone-800/80">
+                    <div>
+                      <h3 className="text-xs font-serif font-bold uppercase tracking-wider text-brand-gold flex items-center gap-2">
+                        <Upload size={14} />
+                        Authorized Digital Signature
+                      </h3>
+                      <p className="text-[11px] text-stone-400 mt-0.5">
+                        Upload your digital signature to appear directly above the &ldquo;{invoice.signatureText || 'Authorized Signatory'}&rdquo; line on the invoice.
+                      </p>
+                    </div>
+
+                    {invoice.signatureUrl && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveSignature}
+                        className="self-start sm:self-auto text-[11px] font-medium text-red-400 hover:text-red-300 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-950/30 hover:bg-red-950/50 border border-red-900/40 transition"
+                        title="Remove digital signature from this invoice"
+                      >
+                        <Trash2 size={12} />
+                        <span>Remove Signature</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {invoice.signatureUrl ? (
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl bg-[#121015] border border-stone-800">
+                      <div className="w-48 h-20 bg-white rounded-lg border border-stone-700/80 p-2 flex items-center justify-center shadow-inner overflow-hidden shrink-0">
+                        <img
+                          src={invoice.signatureUrl}
+                          alt="Signature Preview"
+                          className="max-h-full max-w-full object-contain select-none"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                          <CheckCircle2 size={14} />
+                          <span>Digital Signature Active</span>
+                        </div>
+                        <p className="text-[11px] text-stone-400">
+                          This signature is placed directly on the document above the signatory line and included in PDF downloads.
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-medium rounded-lg border border-stone-700 transition">
+                            <Upload size={12} className="text-brand-gold" />
+                            <span>Replace Signature</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleSignatureUpload}
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="group flex flex-col items-center justify-center border-2 border-dashed border-stone-700/90 hover:border-brand-gold/70 rounded-xl p-6 cursor-pointer bg-[#121015]/60 hover:bg-[#141217] transition">
+                      <div className="w-12 h-12 rounded-full bg-brand-maroon/30 border border-brand-gold/40 flex items-center justify-center mb-2.5 group-hover:scale-105 transition shadow-sm">
+                        <Upload size={18} className="text-brand-gold" />
+                      </div>
+                      <span className="text-xs font-semibold text-stone-200 group-hover:text-brand-gold-light transition">
+                        Click or drag to upload Digital Signature
+                      </span>
+                      <span className="text-[11px] text-stone-500 mt-1">
+                        PNG (transparent background recommended), JPG, SVG &middot; Max 5MB
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleSignatureUpload}
+                      />
+                    </label>
+                  )}
                 </div>
 
                 {/* Terms */}

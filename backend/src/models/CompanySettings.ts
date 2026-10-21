@@ -12,6 +12,7 @@ const CompanySettingsSchema = new Schema<CompanySettings>({
   website: { type: String, default: '' },
   instagram: { type: String, default: DEFAULT_COMPANY_SETTINGS.instagram },
   logoUrl: { type: String, default: DEFAULT_COMPANY_SETTINGS.logoUrl },
+  signatureUrl: { type: String, default: '' },
   bankName: { type: String, default: DEFAULT_COMPANY_SETTINGS.bankName },
   accountName: { type: String, default: DEFAULT_COMPANY_SETTINGS.accountName },
   accountNumber: { type: String, default: DEFAULT_COMPANY_SETTINGS.accountNumber },

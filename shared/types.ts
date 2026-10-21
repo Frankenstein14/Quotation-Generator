@@ -7,6 +7,7 @@ export interface CompanySettings {
   website?: string;
   instagram?: string;
   logoUrl?: string;
+  signatureUrl?: string;
   bankName: string;
   accountName: string;
   accountNumber: string;
@@ -105,6 +106,7 @@ export interface Invoice {
     upiId?: string;
   };
   signatureText?: string;
+  signatureUrl?: string;
   status: 'unpaid' | 'paid' | 'overdue';
   createdAt?: string;
   updatedAt?: string;

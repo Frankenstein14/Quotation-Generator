@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: CompanySettings = {
   website: '',
   instagram: 'kalakargroups',
   logoUrl: '/assets/image3.png',
+  signatureUrl: '',
   bankName: 'AU Small Finance Bank',
   accountName: 'Kalakar Events',
   accountNumber: '2602270599439652',
@@ -205,6 +206,18 @@ export const api = {
         const logoUrl = reader.result as string;
         const updated = await api.updateSettings({ logoUrl });
         resolve({ logoUrl, settings: updated });
+      };
+      reader.readAsDataURL(file);
+    });
+  },
+
+  async uploadSignature(file: File): Promise<{ signatureUrl: string; settings: CompanySettings }> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const signatureUrl = reader.result as string;
+        const updated = await api.updateSettings({ signatureUrl });
+        resolve({ signatureUrl, settings: updated });
       };
       reader.readAsDataURL(file);
     });
