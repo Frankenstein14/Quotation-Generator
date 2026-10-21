@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer-core';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { Quotation, Invoice } from '../../shared/types.js';
+import { Quotation, Invoice } from '../types.js';
 import { getBrowserExecutablePath, ASSETS_DIR, DEFAULT_COMPANY_SETTINGS } from '../config.js';
 import {
   paginateInclusions,

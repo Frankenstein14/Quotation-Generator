@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { CompanySettings } from '../../shared/types.js';
+import { CompanySettings } from '../types.js';
 import { isUsingMongo, LocalCollection } from '../db.js';
 import { DEFAULT_COMPANY_SETTINGS } from '../config.js';
 

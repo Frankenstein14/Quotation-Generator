@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { InvoiceRepository } from '../models/Invoice.js';
 import { SettingsRepository } from '../models/CompanySettings.js';
 import { generateInvoiceHtml, renderPdfFromHtml } from '../services/pdfService.js';
-import { Invoice } from '../../shared/types.js';
+import { Invoice } from '../types.js';
 
 const router = Router();
 

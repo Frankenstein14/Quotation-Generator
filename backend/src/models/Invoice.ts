@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { Invoice } from '../../shared/types.js';
+import { Invoice } from '../types.js';
 import { isUsingMongo, LocalCollection } from '../db.js';
 
 const InvoiceSchema = new Schema<Invoice>({

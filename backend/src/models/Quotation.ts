@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { Quotation } from '../../shared/types.js';
+import { Quotation } from '../types.js';
 import { isUsingMongo, LocalCollection } from '../db.js';
 
 const QuotationSchema = new Schema<Quotation>({

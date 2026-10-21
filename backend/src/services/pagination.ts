@@ -1,4 +1,4 @@
-import { InclusionSection, LineItem } from '../../shared/types.js';
+import { InclusionSection, LineItem } from '../types.js';
 
 export interface RenderInclusionSection {
   title: string;

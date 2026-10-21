@@ -1,4 +1,4 @@
-import { Quotation, Invoice } from '../../shared/types.js';
+import { Quotation, Invoice } from './types.js';
 import { generateQuotationHtml, generateInvoiceHtml, renderPdfFromHtml } from './services/pdfService.js';
 import { DEFAULT_COMPANY_SETTINGS } from './config.js';
 import fs from 'fs';

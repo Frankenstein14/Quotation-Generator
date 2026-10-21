@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { QuotationRepository } from '../models/Quotation.js';
 import { SettingsRepository } from '../models/CompanySettings.js';
 import { generateQuotationHtml, renderPdfFromHtml } from '../services/pdfService.js';
-import { Quotation } from '../../shared/types.js';
+import { Quotation } from '../types.js';
 
 const router = Router();
 
