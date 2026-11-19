@@ -25,3 +25,8 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Graphify
+graphify-out/
+*/graphify-out/
+

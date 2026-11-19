@@ -183,12 +183,16 @@ export function generateQuotationHtml(q: Quotation): string {
                   const qtyDisplay = it.quantity !== undefined && it.quantity !== null && String(it.quantity).trim() !== '' && String(it.quantity).trim() !== '1'
                     ? `${it.quantity}${it.unit ? ` ${it.unit}` : ''}`
                     : '-';
+                  const rateNum = typeof it.rate === 'string' ? parseFloat(it.rate) : Number(it.rate);
+                  const hasRate = !isNaN(rateNum) && rateNum > 0;
+                  const amountNum = typeof it.amount === 'string' ? parseFloat(it.amount) : Number(it.amount);
+                  const hasAmount = !isNaN(amountNum) && amountNum > 0;
                   return `
                     <tr class="${isAlt ? 'alt-row' : ''}">
                       <td class="td-item">${itemNum}. ${it.description}</td>
-                      <td class="td-price">${it.rate ? formatCurrency(it.rate) : '-'}</td>
+                      <td class="td-price">${hasRate ? formatCurrency(rateNum) : '-'}</td>
                       <td class="td-qty">${qtyDisplay}</td>
-                      <td class="td-total">${formatCurrency(it.amount)}</td>
+                      <td class="td-total">${hasAmount ? formatCurrency(amountNum) : ''}</td>
                     </tr>
                   `;
                 }).join('')}

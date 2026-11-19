@@ -202,6 +202,10 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({ quotation:
                   const qtyDisplay = item.quantity !== undefined && item.quantity !== null && String(item.quantity).trim() !== '' && String(item.quantity).trim() !== '1'
                     ? `${item.quantity}${item.unit ? ` ${item.unit}` : ''}`
                     : '-';
+                  const rateNum = typeof item.rate === 'string' ? parseFloat(item.rate) : Number(item.rate);
+                  const hasRate = !isNaN(rateNum) && rateNum > 0;
+                  const amountNum = typeof item.amount === 'string' ? parseFloat(item.amount) : Number(item.amount);
+                  const hasAmount = !isNaN(amountNum) && amountNum > 0;
 
                   return (
                     <tr
@@ -212,13 +216,13 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({ quotation:
                         {itemNum}. {item.description}
                       </td>
                       <td className="text-[9.2pt] py-[2.1mm] px-[3mm] text-[#222222] text-center">
-                        {item.rate ? formatCurrency(item.rate) : '-'}
+                        {hasRate ? formatCurrency(rateNum) : '-'}
                       </td>
                       <td className="text-[9.2pt] py-[2.1mm] px-[3mm] text-[#222222] text-center">
                         {qtyDisplay}
                       </td>
                       <td className="text-[9.2pt] py-[2.1mm] px-[3mm] text-[#222222] text-right font-medium">
-                        {formatCurrency(item.amount)}
+                        {hasAmount ? formatCurrency(amountNum) : ''}
                       </td>
                     </tr>
                   );
