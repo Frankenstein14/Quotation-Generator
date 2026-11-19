@@ -134,7 +134,7 @@ export const InvoiceItemsEditor: React.FC<InvoiceItemsEditorProps> = ({
           )}
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex sm:flex-wrap items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
           {[
             { label: '1st Stage : 30% OCT (Paid)', desc: 'first stage : 30% OCT', status: 'PAID' },
             { label: '2nd Stage : 40% NOV', desc: 'second stage : 40% NOV', status: '' },
@@ -148,7 +148,7 @@ export const InvoiceItemsEditor: React.FC<InvoiceItemsEditorProps> = ({
               key={idx}
               type="button"
               onClick={() => handleAddItem(preset.desc, 0, preset.status)}
-              className="px-2.5 py-1 bg-stone-800/80 hover:bg-stone-700 hover:text-brand-gold-light border border-stone-700/60 rounded-md text-xs text-stone-300 transition flex items-center gap-1.5"
+              className="px-2.5 py-1 bg-stone-800/80 hover:bg-stone-700 hover:text-brand-gold-light border border-stone-700/60 rounded-md text-xs text-stone-300 transition flex items-center gap-1.5 shrink-0 whitespace-nowrap"
             >
               <span>+ {preset.label}</span>
             </button>
@@ -251,9 +251,9 @@ export const InvoiceItemsEditor: React.FC<InvoiceItemsEditorProps> = ({
                   </div>
 
                   {/* Value (₹) & Status Controls */}
-                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full md:w-auto">
+                  <div className="flex items-center justify-between sm:justify-start gap-2 w-full md:w-auto pt-1 sm:pt-0">
                     {/* Value Input */}
-                    <div className="w-full sm:w-36">
+                    <div className="flex-1 sm:w-36">
                       <div className="relative">
                         <span className="absolute left-2.5 top-1.5 text-stone-400 text-xs font-mono">₹</span>
                         <input
@@ -267,7 +267,7 @@ export const InvoiceItemsEditor: React.FC<InvoiceItemsEditorProps> = ({
                     </div>
 
                     {/* Status Pill Selector */}
-                    <div className="flex items-center gap-1 bg-[#121015] p-1 rounded-lg border border-stone-800">
+                    <div className="flex items-center gap-1 bg-[#121015] p-1 rounded-lg border border-stone-800 shrink-0">
                       <button
                         type="button"
                         onClick={() => setItemStatus(idx, isPaid ? '' : 'PAID')}

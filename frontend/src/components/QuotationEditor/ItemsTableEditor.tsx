@@ -108,12 +108,12 @@ export const ItemsTableEditor: React.FC<ItemsTableEditorProps> = ({
   return (
     <div className="space-y-6">
       {/* Quick Add Suggestions Bar */}
-      <div className="bg-[#1c1920] border border-stone-800 rounded-xl p-4 shadow-sm">
-        <div className="text-xs font-semibold text-stone-300 mb-2.5 flex items-center gap-1.5">
+      <div className="bg-[#1c1920] border border-stone-800 rounded-xl p-3.5 sm:p-4 shadow-sm">
+        <div className="text-xs font-semibold text-stone-300 mb-2 sm:mb-2.5 flex items-center gap-1.5">
           <Tag size={13} className="text-brand-gold" />
           <span>Quick Add Popular Event Services:</span>
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0 sm:flex-wrap">
           {[
             'Decoration',
             'Photography',
@@ -130,7 +130,7 @@ export const ItemsTableEditor: React.FC<ItemsTableEditorProps> = ({
               key={srv}
               type="button"
               onClick={() => handleQuickAdd(srv)}
-              className="px-2.5 py-1 bg-stone-800/80 hover:bg-stone-700 hover:text-brand-gold-light border border-stone-700/60 rounded-md text-xs text-stone-300 transition"
+              className="px-2.5 py-1 bg-stone-800/80 hover:bg-stone-700 hover:text-brand-gold-light border border-stone-700/60 rounded-md text-xs text-stone-300 transition shrink-0 whitespace-nowrap"
             >
               + {srv}
             </button>
@@ -204,27 +204,31 @@ export const ItemsTableEditor: React.FC<ItemsTableEditorProps> = ({
               </div>
 
               {/* Row 2 on mobile / Inline on desktop: Qty, Unit, Rate, Amount */}
-              <div className="grid grid-cols-3 md:flex md:items-center gap-2 w-full md:w-auto">
+              <div className="grid grid-cols-3 md:flex md:items-center gap-2 w-full md:w-auto pt-1 md:pt-0">
                 {/* Quantity & Unit */}
-                <div className="flex items-center gap-1 md:w-40">
-                  <input
-                    type="text"
-                    value={item.quantity !== undefined ? item.quantity : ''}
-                    onChange={(e) => handleItemFieldChange(idx, 'quantity', e.target.value)}
-                    placeholder="Qty"
-                    className="w-1/2 md:w-16 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-center text-stone-100 focus:outline-none focus:border-brand-gold transition font-mono"
-                  />
-                  <input
-                    type="text"
-                    value={item.unit || ''}
-                    onChange={(e) => handleItemFieldChange(idx, 'unit', e.target.value)}
-                    placeholder="Unit"
-                    className="w-1/2 md:w-24 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-stone-300 focus:outline-none focus:border-brand-gold transition"
-                  />
+                <div className="flex flex-col md:flex-row md:items-center gap-1 md:w-40">
+                  <span className="text-[10px] text-stone-400 font-medium md:hidden">Qty / Unit</span>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={item.quantity !== undefined ? item.quantity : ''}
+                      onChange={(e) => handleItemFieldChange(idx, 'quantity', e.target.value)}
+                      placeholder="Qty"
+                      className="w-1/2 md:w-16 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-center text-stone-100 focus:outline-none focus:border-brand-gold transition font-mono"
+                    />
+                    <input
+                      type="text"
+                      value={item.unit || ''}
+                      onChange={(e) => handleItemFieldChange(idx, 'unit', e.target.value)}
+                      placeholder="Unit"
+                      className="w-1/2 md:w-24 bg-[#1b1820] border border-stone-700/80 rounded-md px-2 py-1.5 text-xs text-stone-300 focus:outline-none focus:border-brand-gold transition"
+                    />
+                  </div>
                 </div>
 
                 {/* Rate */}
-                <div className="md:w-28">
+                <div className="flex flex-col md:w-28">
+                  <span className="text-[10px] text-stone-400 font-medium md:hidden">Rate (₹)</span>
                   <input
                     type="number"
                     value={item.rate !== undefined ? item.rate : ''}
@@ -235,7 +239,8 @@ export const ItemsTableEditor: React.FC<ItemsTableEditorProps> = ({
                 </div>
 
                 {/* Total Amount */}
-                <div className="md:w-32">
+                <div className="flex flex-col md:w-32">
+                  <span className="text-[10px] text-stone-400 font-medium md:hidden">Total (₹)</span>
                   <input
                     type="number"
                     value={item.amount || ''}

@@ -6,7 +6,7 @@ import { InvoiceDocument } from '../Preview/InvoiceDocument';
 import { DocumentViewer } from '../Preview/DocumentViewer';
 import { exportDocumentToPdf } from '../../services/pdfExporter';
 import { api } from '../../services/api';
-import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, CreditCard, ShieldCheck, CloudCheck, Loader2, Upload, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Edit3, CheckCircle2, AlertCircle, CreditCard, ShieldCheck, CloudCheck, Loader2, Upload, Trash2, Calculator } from 'lucide-react';
 
 interface InvoiceEditorProps {
   initialInvoice?: Invoice | null;
@@ -447,99 +447,127 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
       )}
 
       {/* Header Bar */}
-      <header className="flex items-center justify-between px-4 sm:px-6 py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none no-print">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition"
-          >
-            <ArrowLeft size={14} />
-            <span>Home</span>
-          </button>
+      <header className="px-3 sm:px-6 py-2 sm:py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none space-y-2 sm:space-y-0 no-print">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition shrink-0"
+            >
+              <ArrowLeft size={14} />
+              <span className="hidden sm:inline">Home</span>
+            </button>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-serif font-bold text-sm sm:text-base text-brand-gold tracking-wide">
-                {invoice.invoiceNumber}
-              </h2>
-              <span className="text-xs text-stone-400 hidden sm:inline">
-                ({invoice.client.name || 'New Client'})
-              </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="font-serif font-bold text-xs sm:text-base text-brand-gold tracking-wide truncate">
+                  {invoice.invoiceNumber}
+                </h2>
+                <span className="text-[10px] sm:text-xs text-stone-400 truncate max-w-[95px] sm:max-w-none">
+                  ({invoice.client.name || 'New Client'})
+                </span>
+              </div>
+              <p className="text-[11px] text-stone-500 hidden sm:block">
+                Invoice Generator &middot; Multi-Page A4 Engine
+              </p>
             </div>
-            <p className="text-[11px] text-stone-500 hidden sm:block">
-              Invoice Generator &middot; Multi-Page A4 Engine
-            </p>
+          </div>
+
+          {/* Desktop View Toggle */}
+          <div className="hidden md:flex bg-[#121015] border border-stone-700 rounded-lg p-0.5 text-xs">
+            <button
+              onClick={() => setMobileView('editor')}
+              className={`px-3 py-1 rounded flex items-center gap-1 font-medium transition ${
+                mobileView === 'editor' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400 hover:text-stone-200'
+              }`}
+            >
+              <Edit3 size={13} />
+              <span>Editor</span>
+            </button>
+            <button
+              onClick={() => setMobileView('preview')}
+              className={`px-3 py-1 rounded flex items-center gap-1 font-medium transition ${
+                mobileView === 'preview' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400 hover:text-stone-200'
+              }`}
+            >
+              <Eye size={13} />
+              <span>Preview</span>
+            </button>
+          </div>
+
+          {/* Action Buttons & Autosave Status */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            {/* Autosave Status Badge */}
+            <div className="flex items-center">
+              {saveStatus === 'saving' && (
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-stone-800/90 text-brand-gold-light text-[10px] sm:text-[11px] border border-stone-700/80 shadow-sm animate-pulse">
+                  <Loader2 size={11} className="animate-spin text-brand-gold" />
+                  <span className="hidden sm:inline">Autosaving...</span>
+                  <span className="sm:hidden">Saving</span>
+                </span>
+              )}
+              {saveStatus === 'saved' && (
+                <span
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-950/40 text-emerald-400 text-[10px] sm:text-[11px] border border-emerald-800/40 shadow-sm"
+                  title={lastSavedAt ? `Autosaved at ${lastSavedAt}` : 'All changes saved'}
+                >
+                  <CloudCheck size={12} className="text-emerald-400" />
+                  <span className="hidden sm:inline">{lastSavedAt ? `Saved ${lastSavedAt}` : 'Saved'}</span>
+                  <span className="sm:hidden">Saved</span>
+                </span>
+              )}
+              {saveStatus === 'unsaved' && (
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-950/40 text-amber-300 text-[10px] sm:text-[11px] border border-amber-800/40 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="hidden sm:inline">Unsaved changes...</span>
+                  <span className="sm:hidden">Unsaved</span>
+                </span>
+              )}
+              {saveStatus === 'error' && (
+                <span
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-950/40 text-red-300 text-[10px] sm:text-[11px] border border-red-800/40 shadow-sm"
+                  title="Cloud sync issue - changes are preserved locally in browser"
+                >
+                  <AlertCircle size={11} className="text-red-400" />
+                  <span className="hidden sm:inline">Saved locally</span>
+                  <span className="sm:hidden">Local</span>
+                </span>
+              )}
+            </div>
+
+            <button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-semibold shadow-lg hover:shadow-brand-maroon/30 transition disabled:opacity-50 shrink-0"
+            >
+              <Save size={13} className="text-brand-gold" />
+              <span>{isSaving ? 'Saving...' : 'Save Invoice'}</span>
+            </button>
           </div>
         </div>
 
-        {/* Mobile View Toggle */}
-        <div className="flex md:hidden bg-[#121015] border border-stone-700 rounded-lg p-0.5 text-xs">
-          <button
-            onClick={() => setMobileView('editor')}
-            className={`px-3 py-1 rounded flex items-center gap-1 font-medium ${
-              mobileView === 'editor' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
-            }`}
-          >
-            <Edit3 size={13} />
-            <span>Editor</span>
-          </button>
-          <button
-            onClick={() => setMobileView('preview')}
-            className={`px-3 py-1 rounded flex items-center gap-1 font-medium ${
-              mobileView === 'preview' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
-            }`}
-          >
-            <Eye size={13} />
-            <span>Preview</span>
-          </button>
-        </div>
-
-        {/* Action Buttons & Autosave Status */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Autosave Status Badge */}
-          <div className="flex items-center">
-            {saveStatus === 'saving' && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-800/90 text-brand-gold-light text-[11px] border border-stone-700/80 shadow-sm animate-pulse">
-                <Loader2 size={12} className="animate-spin text-brand-gold" />
-                <span>Autosaving...</span>
-              </span>
-            )}
-            {saveStatus === 'saved' && (
-              <span
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 text-emerald-400 text-[11px] border border-emerald-800/40 shadow-sm"
-                title={lastSavedAt ? `Autosaved at ${lastSavedAt}` : 'All changes saved'}
-              >
-                <CloudCheck size={13} className="text-emerald-400" />
-                <span className="hidden sm:inline">{lastSavedAt ? `Saved ${lastSavedAt}` : 'Saved'}</span>
-                <span className="sm:hidden">Saved</span>
-              </span>
-            )}
-            {saveStatus === 'unsaved' && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-950/40 text-amber-300 text-[11px] border border-amber-800/40 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="hidden sm:inline">Unsaved changes...</span>
-                <span className="sm:hidden">Unsaved</span>
-              </span>
-            )}
-            {saveStatus === 'error' && (
-              <span
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/40 text-red-300 text-[11px] border border-red-800/40 shadow-sm"
-                title="Cloud sync issue - changes are preserved locally in browser"
-              >
-                <AlertCircle size={12} className="text-red-400" />
-                <span>Saved locally</span>
-              </span>
-            )}
+        {/* Mobile View Toggle Bar (Dedicated row 2 on mobile) */}
+        <div className="flex md:hidden items-center justify-between gap-2 pt-1 border-t border-stone-800/60">
+          <div className="flex-1 flex bg-[#121015] border border-stone-700/80 rounded-lg p-0.5 text-xs">
+            <button
+              onClick={() => setMobileView('editor')}
+              className={`flex-1 py-1 rounded flex items-center justify-center gap-1.5 font-medium transition ${
+                mobileView === 'editor' ? 'bg-brand-maroon text-white font-semibold shadow' : 'text-stone-400 hover:text-stone-200'
+              }`}
+            >
+              <Edit3 size={12} />
+              <span>Editor</span>
+            </button>
+            <button
+              onClick={() => setMobileView('preview')}
+              className={`flex-1 py-1 rounded flex items-center justify-center gap-1.5 font-medium transition ${
+                mobileView === 'preview' ? 'bg-brand-maroon text-white font-semibold shadow' : 'text-stone-400 hover:text-stone-200'
+              }`}
+            >
+              <Eye size={12} />
+              <span>Preview</span>
+            </button>
           </div>
-
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-semibold shadow-lg hover:shadow-brand-maroon/30 transition disabled:opacity-50"
-          >
-            <Save size={14} className="text-brand-gold" />
-            <span>{isSaving ? 'Saving...' : 'Save Invoice'}</span>
-          </button>
         </div>
       </header>
 
@@ -552,38 +580,39 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           }`}
         >
           {/* Tab Navigation */}
-          <div className="flex items-center px-4 bg-[#1a1720] border-b border-stone-800 overflow-x-auto no-scrollbar select-none">
+          <div className="flex items-center px-2 sm:px-4 bg-[#1a1720] border-b border-stone-800 overflow-x-auto no-scrollbar select-none gap-1 sm:gap-2">
             <button
               onClick={() => setActiveTab('items')}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
                 activeTab === 'items'
                   ? 'border-brand-gold text-brand-gold-light bg-[#201c27]/60'
                   : 'border-transparent text-stone-400 hover:text-stone-200'
               }`}
             >
-              1. Invoice Items & Totals ({invoice.items.length})
+              <Calculator size={13} />
+              <span>1. Items ({invoice.items.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('client')}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
                 activeTab === 'client'
                   ? 'border-brand-gold text-brand-gold-light bg-[#201c27]/60'
                   : 'border-transparent text-stone-400 hover:text-stone-200'
               }`}
             >
-              2. Client & Due Dates
+              <span>2. Client & Due Dates</span>
             </button>
 
             <button
               onClick={() => setActiveTab('payment')}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
                 activeTab === 'payment'
                   ? 'border-brand-gold text-brand-gold-light bg-[#201c27]/60'
                   : 'border-transparent text-stone-400 hover:text-stone-200'
               }`}
             >
-              <span>3. Payment & Digital Signature</span>
+              <span>3. Payment & Signature</span>
               {invoice.signatureUrl ? (
                 <span className="w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-500/20" title="Signature active" />
               ) : (
@@ -595,7 +624,7 @@ export const InvoiceEditor: React.FC<InvoiceEditorProps> = ({
           </div>
 
           {/* Tab Contents: Scrollable */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
             {activeTab === 'items' && (
               <div className="space-y-6">
                 <InvoiceItemsEditor

@@ -423,23 +423,23 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
       )}
 
       {/* Header Bar */}
-      <header className="px-3 sm:px-6 py-2.5 sm:py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none space-y-2 sm:space-y-0 no-print">
+      <header className="px-3 sm:px-6 py-2 sm:py-3 bg-[#18161c] border-b border-stone-800/80 z-20 select-none space-y-2 sm:space-y-0 no-print">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
             <button
               onClick={handleBack}
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg text-xs font-semibold transition shrink-0"
             >
               <ArrowLeft size={14} />
               <span className="hidden sm:inline">Home</span>
             </button>
 
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <h2 className="font-serif font-bold text-xs sm:text-base text-brand-gold tracking-wide">
+                <h2 className="font-serif font-bold text-xs sm:text-base text-brand-gold tracking-wide truncate">
                   {quotation.quotationNumber}
                 </h2>
-                <span className="text-[11px] sm:text-xs text-stone-400 max-w-[110px] sm:max-w-none truncate">
+                <span className="text-[10px] sm:text-xs text-stone-400 truncate max-w-[95px] sm:max-w-none">
                   ({quotation.client.name || 'New Client'})
                 </span>
               </div>
@@ -463,27 +463,28 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
           </div>
 
           {/* Action Buttons & Autosave Status */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Autosave Status Badge */}
             <div className="flex items-center">
               {saveStatus === 'saving' && (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-stone-800/90 text-brand-gold-light text-[11px] border border-stone-700/80 shadow-sm animate-pulse">
-                  <Loader2 size={12} className="animate-spin text-brand-gold" />
-                  <span>Autosaving...</span>
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-stone-800/90 text-brand-gold-light text-[10px] sm:text-[11px] border border-stone-700/80 shadow-sm animate-pulse">
+                  <Loader2 size={11} className="animate-spin text-brand-gold" />
+                  <span className="hidden sm:inline">Autosaving...</span>
+                  <span className="sm:hidden">Saving</span>
                 </span>
               )}
               {saveStatus === 'saved' && (
                 <span
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/40 text-emerald-400 text-[11px] border border-emerald-800/40 shadow-sm"
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-950/40 text-emerald-400 text-[10px] sm:text-[11px] border border-emerald-800/40 shadow-sm"
                   title={lastSavedAt ? `Autosaved at ${lastSavedAt}` : 'All changes saved'}
                 >
-                  <CloudCheck size={13} className="text-emerald-400" />
+                  <CloudCheck size={12} className="text-emerald-400" />
                   <span className="hidden sm:inline">{lastSavedAt ? `Saved ${lastSavedAt}` : 'Saved'}</span>
                   <span className="sm:hidden">Saved</span>
                 </span>
               )}
               {saveStatus === 'unsaved' && (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-950/40 text-amber-300 text-[11px] border border-amber-800/40 shadow-sm">
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-950/40 text-amber-300 text-[10px] sm:text-[11px] border border-amber-800/40 shadow-sm">
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                   <span className="hidden sm:inline">Unsaved changes...</span>
                   <span className="sm:hidden">Unsaved</span>
@@ -491,11 +492,11 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
               )}
               {saveStatus === 'error' && (
                 <span
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/40 text-red-300 text-[11px] border border-red-800/40 shadow-sm"
+                  className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-950/40 text-red-300 text-[10px] sm:text-[11px] border border-red-800/40 shadow-sm"
                   title="Cloud sync issue - changes are preserved locally in browser"
                 >
-                  <AlertCircle size={12} className="text-red-400" />
-                  <span>Saved locally</span>
+                  <AlertCircle size={11} className="text-red-400" />
+                  <span>Local</span>
                 </span>
               )}
             </div>
@@ -503,21 +504,22 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-semibold shadow-lg hover:shadow-brand-maroon/30 transition disabled:opacity-50"
+              className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-semibold shadow-lg hover:shadow-brand-maroon/30 transition disabled:opacity-50 shrink-0"
             >
-              <Save size={14} className="text-brand-gold" />
-              <span>{isSaving ? 'Saving...' : 'Save Quotation'}</span>
+              <Save size={13} className="text-brand-gold" />
+              <span className="hidden xs:inline">{isSaving ? 'Saving...' : 'Save Quotation'}</span>
+              <span className="xs:hidden">{isSaving ? 'Saving' : 'Save'}</span>
             </button>
           </div>
         </div>
 
         {/* Mobile View Toggle & Start Fresh Button */}
-        <div className="flex md:hidden items-center justify-between gap-2 pt-1 border-t border-stone-800/60">
-          <div className="flex bg-[#121015] border border-stone-700 rounded-lg p-0.5 text-xs flex-1 max-w-[180px]">
+        <div className="flex md:hidden items-center justify-between gap-2 pt-1.5 border-t border-stone-800/60">
+          <div className="flex bg-[#121015] border border-stone-700/80 rounded-lg p-0.5 text-xs flex-1 max-w-[200px]">
             <button
               onClick={() => setMobileView('editor')}
-              className={`flex-1 py-1 rounded flex items-center justify-center gap-1 font-medium ${
-                mobileView === 'editor' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
+              className={`flex-1 py-1 rounded flex items-center justify-center gap-1.5 font-medium transition ${
+                mobileView === 'editor' ? 'bg-brand-maroon text-white font-semibold shadow' : 'text-stone-400 hover:text-stone-200'
               }`}
             >
               <Edit3 size={12} />
@@ -525,8 +527,8 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
             </button>
             <button
               onClick={() => setMobileView('preview')}
-              className={`flex-1 py-1 rounded flex items-center justify-center gap-1 font-medium ${
-                mobileView === 'preview' ? 'bg-brand-maroon text-white font-semibold' : 'text-stone-400'
+              className={`flex-1 py-1 rounded flex items-center justify-center gap-1.5 font-medium transition ${
+                mobileView === 'preview' ? 'bg-brand-maroon text-white font-semibold shadow' : 'text-stone-400 hover:text-stone-200'
               }`}
             >
               <Eye size={12} />
@@ -537,7 +539,7 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
           <button
             type="button"
             onClick={handleStartFromBeginning}
-            className="flex items-center gap-1 px-2.5 py-1 bg-stone-800/80 hover:bg-stone-700 text-stone-300 border border-stone-700 rounded-lg text-[11px] font-semibold transition"
+            className="flex items-center gap-1 px-2.5 py-1.5 bg-stone-800/90 hover:bg-stone-700 text-stone-300 border border-stone-700 rounded-lg text-[11px] font-semibold transition shrink-0"
           >
             <RotateCcw size={12} />
             <span>Start Fresh</span>
@@ -554,55 +556,55 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
           }`}
         >
           {/* Tab Navigation */}
-          <div className="flex items-center px-4 bg-[#1a1720] border-b border-stone-800 overflow-x-auto no-scrollbar select-none">
+          <div className="flex items-center px-2 sm:px-4 bg-[#1a1720] border-b border-stone-800 overflow-x-auto no-scrollbar select-none gap-1 sm:gap-2">
             <button
               onClick={() => setActiveTab('inclusions')}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-1.5 ${
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'inclusions'
                   ? 'border-brand-gold text-brand-gold-light bg-[#201c27]/60'
                   : 'border-transparent text-stone-400 hover:text-stone-200'
               }`}
             >
               <Sparkles size={13} />
-              <span>1. Inclusions (Page 1)</span>
+              <span>1. Inclusions</span>
             </button>
 
             <button
               onClick={() => setActiveTab('client')}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'client'
                   ? 'border-brand-gold text-brand-gold-light bg-[#201c27]/60'
                   : 'border-transparent text-stone-400 hover:text-stone-200'
               }`}
             >
-              2. Client & Event Details
+              <span>2. Client & Event</span>
             </button>
 
             <button
               onClick={() => setActiveTab('items')}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'items'
                   ? 'border-brand-gold text-brand-gold-light bg-[#201c27]/60'
                   : 'border-transparent text-stone-400 hover:text-stone-200'
               }`}
             >
-              3. Items & Pricing ({quotation.items.length})
+              <span>3. Items & Pricing ({quotation.items.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('terms')}
-              className={`px-4 py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap ${
+              className={`px-3 sm:px-4 py-2.5 sm:py-3 text-xs font-semibold border-b-2 transition whitespace-nowrap flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'terms'
                   ? 'border-brand-gold text-brand-gold-light bg-[#201c27]/60'
                   : 'border-transparent text-stone-400 hover:text-stone-200'
               }`}
             >
-              4. Payment & Terms
+              <span>4. Payment & Terms</span>
             </button>
           </div>
 
           {/* Tab Contents: Scrollable */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6">
             {activeTab === 'inclusions' && (
               <InclusionsEditor
                 inclusions={quotation.inclusions}

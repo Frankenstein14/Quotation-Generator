@@ -462,18 +462,18 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
   const detectedBulkSections = bulkText.trim() ? parseBulkInclusions(bulkText) : [];
 
   return (
-    <div className="space-y-6">
-      {/* Preset bar */}
-      <div className="bg-[#1c1920] border border-stone-800 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
-        <div className="flex items-center gap-2 text-xs font-semibold text-stone-300">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Preset bar - horizontally scrollable on mobile */}
+      <div className="bg-[#1c1920] border border-stone-800 rounded-xl p-3 sm:p-4 shadow-sm">
+        <div className="flex items-center gap-2 text-xs font-semibold text-stone-300 mb-2 sm:mb-2.5">
           <Sparkles size={14} className="text-brand-gold shrink-0" />
           <span>Quick Inclusions Templates:</span>
         </div>
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-1 sm:pb-0 sm:flex-wrap">
           <button
             type="button"
             onClick={() => loadPreset('new')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm shrink-0 whitespace-nowrap ${
               inclusions.length === 0
                 ? 'bg-brand-maroon text-brand-gold-light border border-brand-gold'
                 : 'bg-[#251c2e] hover:bg-[#34273e] text-brand-gold-light border border-brand-gold/50'
@@ -481,26 +481,26 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
             title="Start fresh from the beginning with blank inclusions"
           >
             <Plus size={13} className="text-brand-gold" />
-            <span>New (Start from Beginning)</span>
+            <span>New (Start Fresh)</span>
           </button>
           <button
             type="button"
             onClick={() => loadPreset('reference')}
-            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition shrink-0 whitespace-nowrap"
           >
             Reference Quote Template
           </button>
           <button
             type="button"
             onClick={() => loadPreset('wedding')}
-            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition shrink-0 whitespace-nowrap"
           >
             Grand Wedding
           </button>
           <button
             type="button"
             onClick={() => loadPreset('corporate')}
-            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-800/90 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-lg text-xs font-medium transition shrink-0 whitespace-nowrap"
           >
             Corporate Conference
           </button>
@@ -509,7 +509,7 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
           <button
             type="button"
             onClick={() => setShowBulkModal(true)}
-            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-medium transition"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 border border-brand-gold/40 text-brand-gold-light rounded-lg text-xs font-medium transition shrink-0 whitespace-nowrap ml-auto sm:ml-0"
             title="Bulk paste multiple sections and bullet items at once"
           >
             <ClipboardPaste size={13} className="text-brand-gold" />
@@ -544,71 +544,143 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
           return (
             <div
               key={secKey}
-              className="bg-[#1c1920] border border-stone-800/90 rounded-xl p-5 shadow-sm transition hover:border-stone-700"
+              className="bg-[#1c1920] border border-stone-800/90 rounded-xl p-3.5 sm:p-5 shadow-sm transition hover:border-stone-700"
             >
               {/* Section Header Controls */}
-              <div className="flex items-center justify-between gap-3 pb-3 border-b border-stone-800/80 mb-3.5">
-                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    value={section.title}
-                    onChange={(e) => handleUpdateSectionTitle(sIdx, e.target.value)}
-                    placeholder="Section Title (e.g. PHOTOGRAPHY INCLUSIONS)"
-                    className="bg-[#121015] border border-stone-700/80 rounded-lg px-3 py-1.5 text-sm font-semibold text-brand-gold-light focus:outline-none focus:border-brand-gold transition"
-                  />
-                  <input
-                    type="text"
-                    value={section.subtitle || ''}
-                    onChange={(e) => handleUpdateSectionSubtitle(sIdx, e.target.value)}
-                    placeholder="Optional Subtitle (e.g. WEDDING / Morning Tiffin)"
-                    className="bg-[#121015] border border-stone-700/80 rounded-lg px-3 py-1.5 text-xs text-stone-300 focus:outline-none focus:border-brand-gold transition"
-                  />
+              <div className="pb-3 border-b border-stone-800/80 mb-3.5 space-y-2.5">
+                {/* Mobile top meta row: Section label & actions */}
+                <div className="flex items-center justify-between gap-2 sm:hidden">
+                  <span className="text-[11px] font-mono font-bold text-brand-gold bg-brand-gold/10 px-2 py-0.5 rounded border border-brand-gold/30">
+                    Section #{sIdx + 1}
+                  </span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSection(sIdx, 'up')}
+                      disabled={sIdx === 0}
+                      className="p-1.5 text-stone-400 hover:text-stone-100 disabled:opacity-20 rounded hover:bg-stone-800 transition"
+                      title="Move Section Up"
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSection(sIdx, 'down')}
+                      disabled={sIdx === inclusions.length - 1}
+                      className="p-1.5 text-stone-400 hover:text-stone-100 disabled:opacity-20 rounded hover:bg-stone-800 transition"
+                      title="Move Section Down"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSection(sIdx)}
+                      className="p-1.5 text-red-400 hover:text-red-300 rounded hover:bg-red-950/30 transition ml-1"
+                      title="Delete Section"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-1 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleMoveSection(sIdx, 'up')}
-                    disabled={sIdx === 0}
-                    className="p-1.5 text-stone-400 hover:text-stone-100 disabled:opacity-30 rounded hover:bg-stone-800 transition"
-                    title="Move Section Up"
-                  >
-                    <ArrowUp size={14} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleMoveSection(sIdx, 'down')}
-                    disabled={sIdx === inclusions.length - 1}
-                    className="p-1.5 text-stone-400 hover:text-stone-100 disabled:opacity-30 rounded hover:bg-stone-800 transition"
-                    title="Move Section Down"
-                  >
-                    <ArrowDown size={14} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteSection(sIdx)}
-                    className="p-1.5 text-red-400 hover:text-red-300 rounded hover:bg-red-950/30 transition ml-1"
-                    title="Delete Section"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                {/* Input Fields */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                    <input
+                      type="text"
+                      value={section.title}
+                      onChange={(e) => handleUpdateSectionTitle(sIdx, e.target.value)}
+                      placeholder="Section Title (e.g. PHOTOGRAPHY INCLUSIONS)"
+                      className="w-full bg-[#121015] border border-stone-700/80 rounded-lg px-3 py-2 sm:py-1.5 text-xs sm:text-sm font-semibold text-brand-gold-light focus:outline-none focus:border-brand-gold transition"
+                    />
+                    <input
+                      type="text"
+                      value={section.subtitle || ''}
+                      onChange={(e) => handleUpdateSectionSubtitle(sIdx, e.target.value)}
+                      placeholder="Optional Subtitle (e.g. WEDDING / Morning Tiffin)"
+                      className="w-full bg-[#121015] border border-stone-700/80 rounded-lg px-3 py-2 sm:py-1.5 text-xs text-stone-300 focus:outline-none focus:border-brand-gold transition"
+                    />
+                  </div>
+
+                  {/* Desktop action buttons */}
+                  <div className="hidden sm:flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSection(sIdx, 'up')}
+                      disabled={sIdx === 0}
+                      className="p-1.5 text-stone-400 hover:text-stone-100 disabled:opacity-30 rounded hover:bg-stone-800 transition"
+                      title="Move Section Up"
+                    >
+                      <ArrowUp size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveSection(sIdx, 'down')}
+                      disabled={sIdx === inclusions.length - 1}
+                      className="p-1.5 text-stone-400 hover:text-stone-100 disabled:opacity-30 rounded hover:bg-stone-800 transition"
+                      title="Move Section Down"
+                    >
+                      <ArrowDown size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSection(sIdx)}
+                      className="p-1.5 text-red-400 hover:text-red-300 rounded hover:bg-red-950/30 transition ml-1"
+                      title="Delete Section"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Inclusions Content Area */}
               <div className="space-y-2">
                 {/* Items Controls Bar */}
-                <div className="flex items-center justify-between gap-2 text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-stone-300 text-xs">
-                      {isTextareaMode ? 'Inclusion Items (one per line):' : 'Bullet Items:'}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-[#121015] border border-stone-800 text-[11px] text-brand-gold font-medium">
-                      {section.items.length} {section.items.length === 1 ? 'bullet' : 'bullets'}
-                    </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs pb-1">
+                  <div className="flex items-center justify-between sm:justify-start gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-stone-300 text-xs">
+                        {isTextareaMode ? 'Inclusion Items:' : 'Bullet Items:'}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-[#121015] border border-stone-800 text-[11px] text-brand-gold font-medium">
+                        {section.items.length} {section.items.length === 1 ? 'bullet' : 'bullets'}
+                      </span>
+                    </div>
+
+                    {/* Mode Toggle on mobile */}
+                    <div className="flex sm:hidden items-center bg-[#121015] border border-stone-800 rounded-lg p-0.5 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setSectionViewMode(secKey, 'textarea')}
+                        className={`flex items-center gap-1 px-2 py-1 rounded transition shrink-0 ${
+                          isTextareaMode
+                            ? 'bg-brand-maroon text-brand-gold-light font-bold shadow-sm'
+                            : 'text-stone-400'
+                        }`}
+                        title="Single text box mode"
+                      >
+                        <FileText size={11} />
+                        <span>Single Box</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSectionViewMode(secKey, 'list')}
+                        className={`flex items-center gap-1 px-2 py-1 rounded transition shrink-0 ${
+                          !isTextareaMode
+                            ? 'bg-brand-maroon text-brand-gold-light font-bold shadow-sm'
+                            : 'text-stone-400'
+                        }`}
+                        title="List view mode"
+                      >
+                        <ListChecks size={11} />
+                        <span>List</span>
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  {/* Secondary buttons & Desktop toggle */}
+                  <div className="flex items-center justify-end gap-2">
                     {/* Quick Clean Bullets Button */}
                     {isTextareaMode && textValue.trim().length > 0 && (
                       <button
@@ -628,14 +700,14 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
                         type="button"
                         onClick={() => handleClearSectionItems(secKey, sIdx)}
                         title="Clear all bullet items in this section"
-                        className="text-[11px] px-1.5 py-1 text-stone-500 hover:text-red-400 rounded transition"
+                        className="text-[11px] px-2 py-1 text-stone-500 hover:text-red-400 rounded transition"
                       >
                         Clear
                       </button>
                     )}
 
-                    {/* Mode Toggle: Single Large Text Box vs List View */}
-                    <div className="flex items-center bg-[#121015] border border-stone-800 rounded-lg p-0.5 text-[11px]">
+                    {/* Desktop Mode Toggle */}
+                    <div className="hidden sm:flex items-center bg-[#121015] border border-stone-800 rounded-lg p-0.5 text-[11px]">
                       <button
                         type="button"
                         onClick={() => setSectionViewMode(secKey, 'textarea')}
@@ -647,7 +719,7 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
                         title="Single large text box for easy copy-pasting"
                       >
                         <FileText size={11} />
-                        <span>Single Text Box</span>
+                        <span>Single Box</span>
                       </button>
                       <button
                         type="button"
@@ -764,7 +836,7 @@ export const InclusionsEditor: React.FC<InclusionsEditorProps> = ({
       </div>
 
       {/* Add New Section Card */}
-      <div className="bg-[#1c1920]/80 border border-dashed border-stone-700/80 rounded-xl p-5">
+      <div className="bg-[#1c1920]/80 border border-dashed border-stone-700/80 rounded-xl p-3.5 sm:p-5">
         <h4 className="text-xs font-semibold text-brand-gold uppercase tracking-wider mb-3">
           + Add New Inclusions Section
         </h4>
