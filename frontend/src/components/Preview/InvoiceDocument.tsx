@@ -103,6 +103,13 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice: inv }
                       <span className="mr-[3mm] font-bold">:</span>
                       <span className="text-[#222222] font-medium">{inv.event?.location || '-'}</span>
                     </div>
+                    {Boolean(inv.event?.guestCount) && (
+                      <div className="flex mb-[1.2mm] text-[9.2pt]">
+                        <span className="w-[24mm] font-bold text-[#111111]">Guest Count</span>
+                        <span className="mr-[3mm] font-bold">:</span>
+                        <span className="text-[#222222] font-medium">{inv.event.guestCount}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="w-full h-[1.2px] bg-[#222222] my-[3.5mm]"></div>

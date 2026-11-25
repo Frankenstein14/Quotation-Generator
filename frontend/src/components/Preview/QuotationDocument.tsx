@@ -171,6 +171,13 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({ quotation:
                       <span className="mr-[3mm] font-bold">:</span>
                       <span className="text-[#222222] font-medium">{q.event?.location || '-'}</span>
                     </div>
+                    {Boolean(q.event?.guestCount) && (
+                      <div className="flex mb-[1.2mm] text-[9.2pt]">
+                        <span className="w-[22mm] font-bold text-[#111111]">Guest Count</span>
+                        <span className="mr-[3mm] font-bold">:</span>
+                        <span className="text-[#222222] font-medium">{q.event.guestCount}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="w-full h-[1.2px] bg-[#222222] my-[3.5mm]"></div>

@@ -162,6 +162,7 @@ export function generateQuotationHtml(q: Quotation): string {
                   <div class="meta-line"><span class="m-label">Client</span><span class="m-colon">:</span><span class="m-val"><strong>${client.name}</strong></span></div>
                   <div class="meta-line"><span class="m-label">Event</span><span class="m-colon">:</span><span class="m-val">${getCleanEventName(event)}</span></div>
                   <div class="meta-line"><span class="m-label">Location</span><span class="m-colon">:</span><span class="m-val">${event.location || '-'}</span></div>
+                  ${event.guestCount ? `<div class="meta-line"><span class="m-label">Guest Count</span><span class="m-colon">:</span><span class="m-val">${event.guestCount}</span></div>` : ''}
                 </div>
               </div>
               <div class="divider section-divider"></div>
@@ -383,6 +384,7 @@ export function generateInvoiceHtml(inv: Invoice): string {
                   ${client.phone ? `<div class="meta-line"><span class="m-label">Phone</span><span class="m-colon">:</span><span class="m-val">${client.phone}</span></div>` : ''}
                   <div class="meta-line"><span class="m-label">Event</span><span class="m-colon">:</span><span class="m-val">${getCleanEventName(event)}</span></div>
                   <div class="meta-line"><span class="m-label">Location</span><span class="m-colon">:</span><span class="m-val">${event.location || '-'}</span></div>
+                  ${event.guestCount ? `<div class="meta-line"><span class="m-label">Guest Count</span><span class="m-colon">:</span><span class="m-val">${event.guestCount}</span></div>` : ''}
                 </div>
               </div>
               <div class="divider section-divider"></div>

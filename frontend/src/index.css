@@ -54,6 +54,12 @@ body {
   background-color: #ffffff;
 }
 
+/* Document Canvas Scrolling & Touch Behaviors */
+.document-canvas-wrapper {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+}
+
 @media print {
   @page {
     size: A4 portrait;

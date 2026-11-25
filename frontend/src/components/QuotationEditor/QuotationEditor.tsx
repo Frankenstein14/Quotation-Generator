@@ -661,7 +661,7 @@ export const QuotationEditor: React.FC<QuotationEditorProps> = ({
 
         {/* RIGHT: Live A4 Document Preview */}
         <div
-          className={`flex-1 flex flex-col min-w-0 document-preview-column ${
+          className={`flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden document-preview-column ${
             mobileView === 'editor' ? 'hidden md:flex' : 'flex'
           }`}
         >

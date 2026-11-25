@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ZoomIn, ZoomOut, Download, Printer, RefreshCw } from 'lucide-react';
 
 interface DocumentViewerProps {
@@ -14,19 +14,47 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   isGeneratingPdf = false,
   docTitle = 'Document'
 }) => {
+  const docRef = React.useRef<HTMLDivElement>(null);
+  const [scaledHeight, setScaledHeight] = useState<number | undefined>(undefined);
+
   const [scale, setScale] = useState<number>(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
       // Auto-fit A4 (~794px) to mobile screen width with margin
-      return Math.max(Math.min((window.innerWidth - 32) / 800, 0.55), 0.38);
+      return Math.max(Math.min((window.innerWidth - 20) / 794, 0.55), 0.35);
     }
     return 0.75;
   });
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setScale(Math.max(Math.min((window.innerWidth - 20) / 794, 0.55), 0.35));
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!docRef.current) return;
+    const updateHeight = () => {
+      if (docRef.current) {
+        const unscaledH = docRef.current.scrollHeight || docRef.current.offsetHeight;
+        setScaledHeight(unscaledH * scale);
+      }
+    };
+    updateHeight();
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(docRef.current);
+    return () => observer.disconnect();
+  }, [scale, children]);
 
   const zoomIn = () => setScale(prev => Math.min(prev + 0.08, 1.4));
   const zoomOut = () => setScale(prev => Math.max(prev - 0.08, 0.3));
   const zoomReset = () => {
     if (typeof window !== 'undefined' && window.innerWidth < 640) {
-      setScale(Math.max(Math.min((window.innerWidth - 32) / 800, 0.55), 0.38));
+      setScale(Math.max(Math.min((window.innerWidth - 20) / 794, 0.55), 0.35));
     } else {
       setScale(0.75);
     }
@@ -39,7 +67,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   return (
     <div className="flex flex-col h-full bg-[#18161b] border-l border-stone-800">
       {/* Top Toolbar */}
-      <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 bg-[#201d24] border-b border-stone-800 text-stone-200 select-none no-print gap-2">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 bg-[#201d24] border-b border-stone-800 text-stone-200 select-none no-print gap-2 shrink-0">
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <span className="font-serif font-bold text-brand-gold text-xs sm:text-sm tracking-wider uppercase">
             <span className="hidden sm:inline">Live A4 Document Preview</span>
@@ -87,7 +115,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
           <button
             onClick={onDownloadPdf}
             disabled={isGeneratingPdf}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon text-brand-gold-light border border-brand-gold/40 rounded-md text-xs font-semibold shadow-lg hover:shadow-brand-maroon/40 transition disabled:opacity-50"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 bg-gradient-to-r from-brand-maroon to-brand-maroon-dark hover:from-brand-maroon-light hover:to-brand-maroon text-brand-gold-light border border-brand-gold/40 rounded-md text-xs font-semibold shadow-lg hover:shadow-brand-maroon/40 transition disabled:opacity-50 shrink-0"
             title="Generate & Download Multi-Page A4 PDF"
           >
             {isGeneratingPdf ? (
@@ -107,13 +135,23 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
       </div>
 
       {/* Document View Canvas */}
-      <div className="flex-1 overflow-auto p-2 sm:p-8 flex justify-center bg-[#131116] min-h-0 print:p-0 print:bg-white document-canvas-wrapper">
+      <div className="flex-1 overflow-y-auto overflow-x-auto p-2 sm:p-8 bg-[#131116] min-h-0 print:p-0 print:bg-white document-canvas-wrapper overscroll-contain">
         <div
-          id="printable-document-area"
-          className="transition-transform duration-150 origin-top flex flex-col items-center document-scale-container"
-          style={{ transform: `scale(${scale})` }}
+          style={{
+            height: scaledHeight ? `${scaledHeight + 32}px` : undefined,
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center'
+          }}
         >
-          {children}
+          <div
+            id="printable-document-area"
+            ref={docRef}
+            className="transition-transform duration-150 origin-top flex flex-col items-center document-scale-container shrink-0"
+            style={{ transform: `scale(${scale})` }}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>
