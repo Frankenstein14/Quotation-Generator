@@ -451,12 +451,12 @@ export function generateInvoiceHtml(inv: Invoice): string {
                       <span class="tot-colon">:</span>
                       <span class="tot-val" style="color: #2e7d32;">${formatCurrency(inv.amountPaid)}</span>
                     </div>
-                    <div class="totals-row" style="font-size: 9.5pt; font-weight: 700;">
-                      <span class="tot-label">Balance Due</span>
-                      <span class="tot-colon">:</span>
-                      <span class="tot-val" style="color: #b71c1c;">${formatCurrency(inv.balanceDue ?? (inv.grandTotal - inv.amountPaid))}</span>
-                    </div>
                   ` : ''}
+                  <div class="totals-row" style="font-size: 10pt; font-weight: 700; border-top: 1px solid rgba(34,34,34,0.2); padding-top: 1.5mm; margin-top: 1mm;">
+                    <span class="tot-label">Balance</span>
+                    <span class="tot-colon">:</span>
+                    <span class="tot-val">${formatCurrency(inv.balanceDue ?? Math.max(0, (inv.grandTotal || inv.subtotal || 0) - (inv.amountPaid || 0)))}</span>
+                  </div>
                 </div>
               </div>
               <div class="divider totals-divider"></div>

@@ -90,7 +90,7 @@ export const InvoiceItemsEditor: React.FC<InvoiceItemsEditorProps> = ({
     const item = { ...updated[index], [field]: val };
 
     if (field === 'amount') {
-      item.amount = typeof val === 'string' ? parseFloat(val) || 0 : val;
+      item.amount = typeof val === 'string' ? (val === '' ? '' : (isNaN(parseFloat(val)) ? 0 : parseFloat(val))) : val;
     }
 
     updated[index] = item;
@@ -512,14 +512,11 @@ export const InvoiceItemsEditor: React.FC<InvoiceItemsEditorProps> = ({
               )}
             </div>
 
-            {/* Document Preview of the Balance Badge */}
-            <div className="pt-4">
-              <div className="text-[11px] text-stone-400 uppercase tracking-wider mb-2">
-                Document Balance Badge Preview
-              </div>
-              <div className="flex items-center justify-between bg-stone-900/90 p-3 rounded-lg border border-stone-700/60">
-                <span className="text-xs font-bold text-stone-100">Balance</span>
-                <span className="bg-[#111111] text-white px-3.5 py-1.5 rounded font-mono font-bold text-xs shadow tracking-wide border border-stone-700">
+            {/* Document Balance Summary */}
+            <div className="pt-4 border-t border-stone-800">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-[#141217] border border-stone-700/80">
+                <span className="text-xs font-bold text-stone-200">Balance Due</span>
+                <span className="font-bold text-sm text-brand-gold-light">
                   Rs. {effectiveBalanceDue.toLocaleString('en-IN')}
                 </span>
               </div>
